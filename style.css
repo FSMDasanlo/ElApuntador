@@ -1,0 +1,91 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body.index {
+  background: url('assets/portada.jpg') no-repeat center center/cover;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Efecto de desvanecimiento */
+.overlay {
+  background: rgba(0,0,0,0.6);
+  color: white;
+  text-align: center;
+  padding: 2rem;
+  border-radius: 12px;
+  transition: opacity 1s ease;
+}
+
+.overlay.fade-out {
+  opacity: 0;
+}
+
+.overlay h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.overlay p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.overlay button {
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #f5b301;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+}
+
+body.juegos {
+  background: #f3f3f3;
+  font-family: sans-serif;
+  min-height: 100vh;
+}
+
+header {
+  text-align: center;
+  padding: 1rem;
+}
+
+.juegos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.juego-card {
+  background-size: cover;
+  background-position: center;
+  height: 180px;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.juego-card:hover {
+  transform: scale(1.05);
+}
+
+.juego-card span {
+  background: rgba(0,0,0,0.6);
+  color: white;
+  width: 100%;
+  text-align: center;
+  padding: 0.5rem 0;
+}
