@@ -3,9 +3,9 @@ let juegoSeleccionado = localStorage.getItem('juegoSeleccionado') || 'continenta
 
 // Mostrar título dinámico con el juego seleccionado
 window.addEventListener('DOMContentLoaded', () => {
-  const titulo = document.getElementById('titulo-juego');
-  const nombreJuego = juegoSeleccionado.replace('.html', '').replace(/_/g, ' ');
-  titulo.textContent = `Entrada de jugadores para "${nombreJuego}"`;
+  const nombreJuego = juegoSeleccionado.replace('.html', '').replace(/_/g, ' ').toUpperCase();
+  document.getElementById('nombre-juego').textContent = nombreJuego;
+  document.getElementById('mensaje-juego').textContent = 'Entrada de jugadores';
   renderLista();
 });
 
@@ -36,7 +36,6 @@ function renderLista() {
     ul.appendChild(li);
   });
 }
-
 // ----------------------------
 // Añadir jugador
 // ----------------------------

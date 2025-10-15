@@ -9,9 +9,10 @@
 </head>
 <body class="gestion">
   <header>
-    <h1 id="titulo-juego">Entrada de jugadores</h1>
-    <button class="volver" onclick="window.location.href='juegos.html'">← Volver a juegos</button>
-  </header>
+  <h1 id="nombre-juego">JUEGO</h1>
+  <p id="mensaje-juego">Entrada de jugadores</p>
+  <button class="volver" onclick="window.location.href='juegos.html'">← Volver a juegos</button>
+</header>
 
   <main>
     <div class="contenedor-gestion">
@@ -23,7 +24,6 @@
         <input type="text" id="nombre-jugador" placeholder="Nombre">
         <button onclick="agregarJugador()">➕ Añadir</button>
       </div>
-
       <div class="botones-finales">
         <button class="limpiar" onclick="limpiarJugadores()">🧹 Limpiar lista</button>
         <button class="jugar" onclick="irAlJuego()">▶ Ir al juego</button>

@@ -5,6 +5,5 @@ function irAJuegos() {
     window.location.href = "juegos.html"; // Redirige tras 1 segundo
   }, 1000);
 }
-
 // Redirigir automáticamente tras 10 segundos
 setTimeout(irAJuegos, 10000);
