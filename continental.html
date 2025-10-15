@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Continental - El Apuntador</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="continental.js" defer></script>
+</head>
+<body class="juego">
+  <header>
+    <h1>Continental 🃏</h1>
+    <div class="acciones">
+      <button onclick="volverAJuegos()">← Juegos</button>
+      <button onclick="irAGestionJugadores()">👤 Jugadores</button>
+      <button onclick="limpiarPuntuaciones()">🧹 Limpiar puntuaciones</button>
+    </div>
+  </header>
+
+  <main class="marcador">
+    <div class="tabla">
+      <table id="tabla-puntos">
+        <thead>
+          <tr>
+            <th>Jugador</th>
+            <th>2 Tríos</th>
+            <th>1 Trío 1 Esc.</th>
+            <th>2 Esc.</th>
+            <th>3 Tríos</th>
+            <th>2 Tríos 1 Esc.</th>
+            <th>2 Esc. 1 Trío</th>
+            <th>4 Tríos</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- filas de jugadores generadas dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

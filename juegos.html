@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>El Apuntador - Juegos</title>
   <link rel="stylesheet" href="style.css">
+  <script>
+    function seleccionarJuego(url) {
+      localStorage.setItem('juegoSeleccionado', url);
+      window.location.href = 'gestion_jugadores.html';
+    }
+  </script>
 </head>
 <body class="juegos">
   <header>
@@ -12,22 +18,22 @@
   </header>
 
   <main class="juegos-grid">
-    <div class="juego-card" style="background-image: url('assets/continental.jpg');">
+    <div class="juego-card" style="background-image: url('assets/continental.jpg');" onclick="seleccionarJuego('continental.html')">
       <span>Continental</span>
     </div>
-    <div class="juego-card" style="background-image: url('assets/dados.jpg');">
+    <div class="juego-card" style="background-image: url('assets/dados.jpg');" onclick="seleccionarJuego('dados.html')">
       <span>Dados Mentiroso</span>
     </div>
-    <div class="juego-card" style="background-image: url('assets/pocha.jpg');">
+    <div class="juego-card" style="background-image: url('assets/pocha.jpg');" onclick="seleccionarJuego('pocha.html')">
       <span>La Pocha</span>
     </div>
-    <div class="juego-card" style="background-image: url('assets/domino.jpg');">
+    <div class="juego-card" style="background-image: url('assets/domino.jpg');" onclick="seleccionarJuego('domino.html')">
       <span>Dominó</span>
     </div>
-    <div class="juego-card" style="background-image: url('assets/juego5.jpg');">
+    <div class="juego-card" style="background-image: url('assets/juego5.jpg');" onclick="seleccionarJuego('juego5.html')">
       <span>Juego 5</span>
     </div>
-    <div class="juego-card" style="background-image: url('assets/juego6.jpg');">
+    <div class="juego-card" style="background-image: url('assets/juego6.jpg');" onclick="seleccionarJuego('juego6.html')">
       <span>Juego 6</span>
     </div>
   </main>
