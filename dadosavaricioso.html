@@ -3,40 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Avaricioso - El Apuntador</title>
+  <title>El Avaricioso - Puntuación</title>
   <link rel="stylesheet" href="style.css">
   <script src="dadosavaricioso.js" defer></script>
+  <style>
+    /* ===== Modal de ayuda ===== */
+    .modal {
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0; top: 0;
+      width: 100%; height: 100%; 
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-contenido {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 1.5rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .modal-contenido h2 {
+      color: #4a90e2;
+      margin-bottom: 1rem;
+    }
+
+    .modal-contenido p {
+      margin-bottom: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .cerrar {
+      color: #aaa;
+      float: right;
+      font-size: 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .cerrar:hover {
+      color: #000;
+    }
+  </style>
 </head>
 <body class="juego">
   <header>
-    <h1 id="nombre-juego">AVARICIOSO</h1>
+    <h1 id="nombre-juego">EL AVARICIOSO
+      <button id="btn-ayuda" title="Ver instrucciones" style="margin-left: 10px; font-size:1.2rem; cursor:pointer;">❓</button>
+    </h1>
+    <p id="mensaje-juego">Puntuación:<input type="number" id="meta-puntos" value="5000" min="100" style="width:80px;"></p>
+    <div class="acciones">
+      <button onclick="window.location.href='juegos.html'">← A juegos</button>
+      <button onclick="limpiarPuntuaciones()">🧹 Borrar</button>
+      <button onclick="window.location.href='gestion_jugadores.html'">👥 Jugadores</button>
+      <button onclick="agregarFila()">➕ Añadir fila</button>
+    </div>
   </header>
 
   <main class="marcador">
     <div class="tabla">
-      <div class="meta-puntos-container" style="text-align:center; margin-bottom:0.8rem;">
-        <label for="meta-puntos">Puntos objetivo:</label>
-        <input type="number" id="meta-puntos" value="5000" style="width:100px; text-align:center;">
-      </div>
-
       <table id="tabla-puntos">
         <thead>
           <tr id="fila-totales"></tr>
           <tr id="fila-nombres"></tr>
         </thead>
-        <tbody id="cuerpo-tabla">
-          <!-- Filas de puntuaciones generadas por JS -->
-        </tbody>
+        <tbody id="cuerpo-tabla"></tbody>
       </table>
-
-      <div class="separador" style="height:1rem;"></div>
-
-      <div class="acciones" style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top:1rem;">
-        <button onclick="window.location.href='gestion_jugadores.html'">← Gestión de jugadores</button>
-        <button onclick="window.location.href='juegos.html'">← Volver a juegos</button>
-        <button onclick="agregarFila()">➕ Añadir fila</button>
-      </div>
     </div>
   </main>
+
+ <!-- Modal de ayuda -->
+<div id="modal-ayuda" class="modal">
+  <div class="modal-contenido">
+    <span class="cerrar">&times;</span>
+    <h2>Instrucciones</h2>
+    <p>A este juego de dados se le conoce por varios nombres: <strong>Avaricioso</strong>, Ambicioso, El Seguro.</p>
+    <p>Se juega lanzando dados por turnos para acumular puntos, con el objetivo de llegar o superar un puntaje objetivo.</p>
+    <p>Solo puntúan los Reyes (K) y los Ases. Las K valen 50 puntos y los Ases 100. Si en una tirada no hay Ks ni Ases, se pierde la puntuación de esa tirada (0).</p>
+    <p><span style="color:red; font-weight:bold;">Puntuación extra: 3 Ases = 1000 puntos, 3 Ks = 500 puntos.</span></p>
+    <p>El jugador decide si continuar lanzando o asegurar los puntos acumulados. Si no salen Ks ni Ases, se apunta 0.</p>
+    <p>El jugador lanza los dados, separa los Ks y Ases para conservarlos, y puede seguir tirando con los restantes o plantarse.</p>
+    <p>El jugador, empieza tirando los 5 dados. Si sale una K y un AS, suma 150 puntos (100 + 50) y separa esos dos dados. Ahora debe decidir si sigue tirando con los 3 dados que le quedan, o se apunta los 150 puntos y cede el turno al siguiente jugador que esté a su derecha.</p>
+    <p>Puede seguir tirando tantas veces como quiera. Si los 5 dados han salido K o AS, puede volver a meter los 5 en el cubilete y seguir tirando. El jugador decide cuándo termina su jugada…eso sí, si en una tirada no salen ni Ks ni Ases, se queda con 0 en esa ronda.</p>
+    <p><strong>Resumen:</strong></p>
+    <ul>
+      <li>El jugador lanza los dados.</li>
+      <li>Se separan los dados (K y Ases) que hayan salido para conservarlos y sumar puntos, y puede plantarse o seguir lanzando con el resto de los dados.</li>
+      <li>El jugador decide si quiere seguir lanzando para aumentar su puntuación o si prefiere "asegurar" los puntos ya acumulados y pasar el turno.</li>
+      <li>Si en una tirada no salen K o Ases, se le apuntará un 0 en esa ronda.</li>
+    </ul>
+  </div>
+</div>
+
 </body>
 </html>

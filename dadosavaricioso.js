@@ -12,6 +12,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let jugadores = JSON.parse(localStorage.getItem("jugadores")) || [];
 
+// ===== Modal de ayuda =====
+const btnAyuda = document.getElementById("btn-ayuda");
+const modal = document.getElementById("modal-ayuda");
+const spanCerrar = modal.querySelector(".cerrar");
+
+btnAyuda.addEventListener("click", () => {
+  modal.style.display = "block";
+});
+
+spanCerrar.addEventListener("click", () => {
+  modal.style.display = "none";
+});
+
+// Cerrar modal haciendo clic fuera
+window.addEventListener("click", (e) => {
+  if (e.target === modal) modal.style.display = "none";
+});
+
   // -------------------- FUNCIONES --------------------
 
   window.agregarFila = function() {
