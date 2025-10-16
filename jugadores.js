@@ -1,9 +1,18 @@
 let jugadores = JSON.parse(localStorage.getItem('jugadores')) || [];
 let juegoSeleccionado = localStorage.getItem('juegoSeleccionado') || 'continental.html';
 
-// Mostrar título dinámico con el juego seleccionado
+// Mapeo de nombres bonitos para cada juego
+const nombresBonitos = {
+  "continental.html": "CONTINENTAL",
+  "dadosavaricioso.html": "EL AVARICIOSO",
+  // añade aquí los próximos juegos
+};
+
+// ----------------------------
+// Inicialización y título
+// ----------------------------
 window.addEventListener('DOMContentLoaded', () => {
-  const nombreJuego = juegoSeleccionado.replace('.html', '').replace(/_/g, ' ').toUpperCase();
+  const nombreJuego = nombresBonitos[juegoSeleccionado] || juegoSeleccionado.replace('.html', '').toUpperCase();
   document.getElementById('nombre-juego').textContent = nombreJuego;
   document.getElementById('mensaje-juego').textContent = 'Entrada de jugadores';
   renderLista();
@@ -36,6 +45,7 @@ function renderLista() {
     ul.appendChild(li);
   });
 }
+
 // ----------------------------
 // Añadir jugador
 // ----------------------------

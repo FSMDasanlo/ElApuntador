@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avaricioso - El Apuntador</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="dadosavaricioso.js" defer></script>
+</head>
+<body class="juego">
+  <header>
+    <h1 id="nombre-juego">AVARICIOSO</h1>
+  </header>
+
+  <main class="marcador">
+    <div class="tabla">
+      <div class="meta-puntos-container" style="text-align:center; margin-bottom:0.8rem;">
+        <label for="meta-puntos">Puntos objetivo:</label>
+        <input type="number" id="meta-puntos" value="5000" style="width:100px; text-align:center;">
+      </div>
+
+      <table id="tabla-puntos">
+        <thead>
+          <tr id="fila-totales"></tr>
+          <tr id="fila-nombres"></tr>
+        </thead>
+        <tbody id="cuerpo-tabla">
+          <!-- Filas de puntuaciones generadas por JS -->
+        </tbody>
+      </table>
+
+      <div class="separador" style="height:1rem;"></div>
+
+      <div class="acciones" style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top:1rem;">
+        <button onclick="window.location.href='gestion_jugadores.html'">← Gestión de jugadores</button>
+        <button onclick="window.location.href='juegos.html'">← Volver a juegos</button>
+        <button onclick="agregarFila()">➕ Añadir fila</button>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

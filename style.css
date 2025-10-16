@@ -988,3 +988,62 @@ header p#mensaje-juego {
   height: 1px;
   background-color: #ccc;
 }
+/* ===== Fila de totales ===== */
+#tabla-puntos th {
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Resaltar máximo (más puntos = líder) */
+#tabla-puntos th[maximo] {
+  background-color: #50c878; /* verde vivo */
+  color: white;
+}
+
+/* Resaltar mínimo (menos puntos) */
+#tabla-puntos th[minimo] {
+  background-color: #ffa500; /* naranja */
+  color: white;
+}
+
+/* Ranking en vivo */
+.ranking {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.ranking h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  color: #4a90e2;
+}
+
+.ranking ol {
+  padding-left: 1rem;
+}
+
+.ranking li {
+  margin-bottom: 0.3rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+/* Colores según posición */
+.ranking li:nth-child(1) { background: #50c878; color: white; }   /* 1º */
+.ranking li:nth-child(2) { background: #f5d142; color: white; }   /* 2º */
+.ranking li:nth-child(3) { background: #ff7f50; color: white; }   /* 3º */
+
+/* Filas más bajas para Avaricioso */
+#tabla-puntos th, #tabla-puntos td {
+  padding: 0.3rem 0.5rem; /* antes 0.6rem 0.6rem */
+  font-size: 0.95rem;      /* un poquito más pequeño si quieres */
+}
+
+@media (max-width: 700px) {
+  #tabla-puntos th, #tabla-puntos td {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.85rem;
+  }
+}
