@@ -8,22 +8,24 @@
   <script src="jugadores.js" defer></script>
 </head>
 <body class="gestion">
-  <header>
-  <h1 id="nombre-juego">JUEGO</h1>
-  <p id="mensaje-juego">Entrada de jugadores</p>
-  <button class="volver" onclick="window.location.href='juegos.html'">← Volver a juegos</button>
-</header>
+  <header class="header-juego">
+    <!-- 👇 Este nombre se rellena dinámicamente -->
+    <h1 id="nombre-juego"></h1>
+    <p id="mensaje-juego">Entrada de jugadores</p>
+    <button class="volver" onclick="window.location.href='juegos.html'">← Volver a juegos</button>
+  </header>
+
+  <hr class="separador">
 
   <main>
     <div class="contenedor-gestion">
-      <div class="lista-jugadores">
-        <ul id="lista-jugadores"></ul>
-      </div>
+      <ul id="lista-jugadores" class="lista-jugadores"></ul>
 
       <div class="agregar-jugador">
-        <input type="text" id="nombre-jugador" placeholder="Nombre">
+        <input type="text" id="nombre-jugador" placeholder="Nombre" onkeypress="if(event.key==='Enter') agregarJugador()">
         <button onclick="agregarJugador()">➕ Añadir</button>
       </div>
+
       <div class="botones-finales">
         <button class="limpiar" onclick="limpiarJugadores()">🧹 Limpiar lista</button>
         <button class="jugar" onclick="irAlJuego()">▶ Ir al juego</button>

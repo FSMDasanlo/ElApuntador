@@ -755,3 +755,236 @@ header p#mensaje-juego {
   color: #555;
   margin: 0.2rem 0 0.8rem 0;
 }
+.ranking {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 1rem;
+  color: #333;
+}
+
+.ranking h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  color: #4a90e2;
+}
+
+.ranking ol {
+  padding-left: 1rem;
+}
+
+.ranking li {
+  margin-bottom: 0.3rem;
+}
+/* Resaltar top3 en tabla de puntuaciones */
+#tabla-puntos tbody tr {
+  transition: background 0.5s;
+}
+
+#tabla-puntos tbody tr.top1 { background: #d4f0d4; } /* verde */
+#tabla-puntos tbody tr.top2 { background: #d4e8f0; } /* azul */
+#tabla-puntos tbody tr.top3 { background: #ffe5cc; } /* naranja suave */
+
+/* Ranking en vivo */
+.ranking {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 1rem;
+  color: #333;
+}
+
+.ranking h3 { margin-bottom:0.5rem; font-size:1.2rem; color:#4a90e2; }
+.ranking ol { padding-left:1rem; }
+.ranking li { margin-bottom:0.3rem; }
+.header-juego {
+  text-align: center;
+  margin-top: 10px;
+}
+.header-juego {
+  text-align: center !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.header-juego h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 10px 0;
+  text-align: center;
+}
+
+
+.botones-superiores {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.botones-superiores button {
+  padding: 8px 15px;
+  font-size: 0.9em;
+  border: none;
+  border-radius: 6px;
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.botones-superiores button:hover {
+  background-color: #45a049;
+}
+
+.separador {
+  margin: 15px auto;
+  width: 90%;
+  border: none;
+  height: 1px;
+  background-color: #ccc;
+}
+
+/* Encabezado */
+.header-juego {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.header-juego h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.header-juego p {
+  font-size: 1rem;
+  margin: 5px 0;
+  color: #555;
+}
+
+.header-juego .volver {
+  margin-top: 10px;
+  padding: 6px 12px;
+  background-color: #888;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.header-juego .volver:hover {
+  background-color: #666;
+}
+
+/* Lista de jugadores */
+.contenedor-gestion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.lista-jugadores {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.lista-jugadores li {
+  background: #f2f2f2;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lista-jugadores li button {
+  background: #d9534f;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.lista-jugadores li button:hover {
+  background: #c9302c;
+}
+
+/* Input y botón Añadir */
+.agregar-jugador {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.agregar-jugador input {
+  flex: 1;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.agregar-jugador button {
+  padding: 8px 15px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.agregar-jugador button:hover {
+  background-color: #45a049;
+}
+
+/* Botones finales */
+.botones-finales {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.botones-finales button {
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+}
+
+.botones-finales .limpiar {
+  background-color: #d9534f;
+}
+.botones-finales .limpiar:hover {
+  background-color: #c9302c;
+}
+
+.botones-finales .jugar {
+  background-color: #4CAF50;
+}
+.botones-finales .jugar:hover {
+  background-color: #45a049;
+}
+
+/* Separador */
+.separador {
+  margin: 15px auto;
+  width: 90%;
+  border: none;
+  height: 1px;
+  background-color: #ccc;
+}

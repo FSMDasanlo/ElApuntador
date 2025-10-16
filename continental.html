@@ -3,20 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Continental - El Apuntador</title>
+  <title>El Apuntador - Continental</title>
   <link rel="stylesheet" href="style.css">
   <script src="continental.js" defer></script>
 </head>
 <body class="juego">
-  <header>
-    <h1>Continental 🃏</h1>
-    <div class="acciones">
-      <button onclick="volverAJuegos()">← Juegos</button>
-      <button onclick="irAGestionJugadores()">👤 Jugadores</button>
-      <button onclick="limpiarPuntuaciones()">🧹 Limpiar puntuaciones</button>
-    </div>
-  </header>
+ 
+ <header class="header-juego">
+  <h1 id="nombre-juego">CONTINENTAL</h1>
+</header>
 
+<div class="botones-superiores">
+  <button onclick="location.href='juegos.html'">Volver a juegos</button>
+  <button onclick="location.href='gestion_jugadores.html'">Gestión de nombres</button>
+  <button onclick="limpiarPuntuaciones()">Limpiar puntuación</button>
+</div>
+
+<hr class="separador">
+
+<div id="contenedor-tabla">
+  <!-- aquí ya tienes tu tabla -->
   <main class="marcador">
     <div class="tabla">
       <table id="tabla-puntos">
@@ -32,11 +38,15 @@
             <th>4 Tríos</th>
             <th>Total</th>
           </tr>
+</div>
         </thead>
         <tbody>
-          <!-- filas de jugadores generadas dinámicamente -->
+          <!-- filas generadas dinámicamente -->
         </tbody>
       </table>
+
+      <!-- Ranking en vivo -->
+      <div id="ranking-vivo" class="ranking"></div>
     </div>
   </main>
 </body>
