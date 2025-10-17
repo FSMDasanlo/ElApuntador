@@ -14,15 +14,46 @@
       });
     });
   </script>
+
+  <style>
+    /* ===== Botón de ayuda con ícono azul ===== */
+    #btn-ayuda {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background-color: #4a90e2;  /* azul */
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      transition: transform 0.2s, background-color 0.2s;
+      margin-left: 10px;
+    }
+
+    #btn-ayuda:hover {
+      background-color: #357ab8;
+      transform: scale(1.1);
+    }
+
+    #btn-ayuda svg {
+      width: 20px;
+      height: 20px;
+    }
+  </style>
 </head>
 <body class="juego">
  
  <header class="header-juego">
   <h1 id="nombre-juego">
     CONTINENTAL
-    <button id="btn-ayuda" title="Ver reglamento"
-            style="margin-left: 10px; font-size: 1.2rem; cursor: pointer; border: none; background: none;">
-      ❓
+    <button id="btn-ayuda" title="Ver reglamento">
+      <!-- Ícono SVG de información -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+        <circle cx="12" cy="12" r="10" fill="none"/>
+        <text x="12" y="16" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold">i</text>
+      </svg>
     </button>
   </h1>
 </header>
@@ -66,4 +97,3 @@
 
 </body>
 </html>
-
