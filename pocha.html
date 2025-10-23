@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La Pocha</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="pocha.js" defer></script>
+
+  <style>
+    /* ===== Modal de ayuda ===== */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-contenido {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 1.5rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-contenido h2 {
+      color: #4a90e2;
+      margin-bottom: 1rem;
+    }
+
+    .modal-contenido p {
+      margin-bottom: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .cerrar {
+      color: #aaa;
+      float: right;
+      font-size: 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .cerrar:hover {
+      color: #000;
+    }
+
+    /* ===== Botón de ayuda con ícono azul ===== */
+    .btn-help {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background-color: #4a90e2;
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, background-color 0.2s;
+      margin-left: 10px;
+    }
+
+    .btn-help:hover {
+      background-color: #357ab8;
+      transform: scale(1.1);
+    }
+
+    .btn-help svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .acciones {
+      margin-top: 1rem;
+      order: 3;
+    }
+
+    /* === Sombreado fila B === */
+    .fila-b,
+    .fila-b td {
+      background-color: #fff9c4 !important; /* amarillo suave */
+    }
+  </style>
+</head>
+
+<body class="juego">
+  <header>
+    <h1 id="nombre-juego">
+      LA POCHA
+      <button id="btn-ayuda" title="Ver instrucciones" class="btn-help">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+          <circle cx="12" cy="12" r="10" fill="none" />
+          <text x="12" y="16" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold">i</text>
+        </svg>
+      </button>
+    </h1>
+
+    <div class="acciones">
+      <button onclick="window.location.href='juegos.html'">← A juegos</button>
+      <button onclick="limpiarPuntuaciones()">🧹 Borrar</button>
+      <button onclick="window.location.href='gestion_jugadores.html'">👥 Jugadores</button>
+      <button onclick="agregarJugador()">➕ Añadir jugador</button>
+    </div>
+  </header>
+
+  <main class="marcador">
+    <div class="tabla">
+      <table id="tabla-puntos">
+        <thead>
+          <tr>
+            <th>Jugador</th>
+            <th>1 Carta</th>
+            <th>2 Cartas</th>
+            <th>3 Cartas</th>
+            <th>4 Cartas</th>
+            <th>5 Cartas</th>
+            <th>6 Cartas</th>
+            <th>7 Cartas</th>
+            <th>8 Cartas</th>
+            <th>9 Cartas</th>
+            <th>10 Cartas</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-tabla"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Modal de ayuda -->
+  <div id="modal-ayuda" class="modal">
+    <div class="modal-contenido">
+      <span class="cerrar">&times;</span>
+      <h2>Instrucciones</h2>
+      <p>
+        La pocha es un juego de cartas en el que el objetivo es acertar el número exacto de bazas que se ganarán en cada mano.<br>
+        Se juega con una baraja española y se reparte un número creciente de cartas por mano hasta que se reparten todas las
+        cartas de la baraja, para luego ir disminuyendo hasta una sola por mano.
+        Para ganar puntos, el jugador debe acertar su predicción, obteniendo 10 puntos más 5 puntos por cada baza ganada;
+        si no acierta, se le restan 5 puntos por cada baza de diferencia.
+      </p>
+
+      <p><strong>Reglas del juego:</strong></p>
+      <ul>
+        <li><strong>Objetivo:</strong> Ganar el mayor número de puntos acertando las bazas que se pronostican.</li>
+        <li><strong>Reparto:</strong> Se reparten cartas de manera ascendente hasta la mitad del mazo y luego descendente.</li>
+        <li><strong>Apuestas:</strong> Antes de cada mano, se debe predecir el número de bazas que se ganarán.</li>
+        <li><strong>Juego de bazas:</strong>
+          <p>La última carta repartida determina el "triunfo" para ese juego.</p>
+          <p>La mano comienza echando una carta, que será el palo de salida, para esa ronda del juego.</p>
+          Los demás jugadores deben jugar una carta del mismo palo si pueden, de mayor valor si es posible.
+          Si no tienen del palo de salida, deben jugar una carta de triunfo (si tienen).
+          Si no tienen del palo de salida ni triunfo, pueden jugar cualquier carta.
+          La baza la gana el jugador que haya jugado el triunfo más alto o, en su defecto, la carta más alta del palo de salida.
+        </li>
+        <li><strong>Puntuación:</strong></li>
+        <p>Si se acierta el número exacto de bazas: Se obtienen 10 puntos + 5 puntos por cada baza ganada.</p>
+        <p>Si no se acierta: Se pierden 5 puntos por cada baza de diferencia entre la predicción y el resultado.</p>
+        <li><strong>Final:</strong> El juego termina cuando se completa el ciclo de repartos y el jugador con más puntos es el ganador.</li>
+        <li><strong>Variaciones:</strong></li>
+        <li>Rondas Indias o Vistas: Los jugadores colocan una carta en la frente sin verla.</li>
+        <li>Subasta de triunfo: En algunas variantes, se subasta el palo de triunfo.</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // === Comportamiento del modal de ayuda ===
+    const modal = document.getElementById("modal-ayuda");
+    const btnAyuda = document.getElementById("btn-ayuda");
+    const cerrar = document.querySelector(".cerrar");
+
+    btnAyuda.addEventListener("click", () => {
+      modal.style.display = "block";
+    });
+
+    cerrar.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>

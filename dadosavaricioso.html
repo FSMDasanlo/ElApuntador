@@ -81,37 +81,45 @@
   </style>
 </head>
 <body class="juego">
-  <header>
+ <header class="header-juego">
+  <div class="titulo">
     <h1 id="nombre-juego">
       EL AVARICIOSO
       <button id="btn-ayuda" title="Ver instrucciones" class="btn-help">
-        <!-- Ícono SVG de información -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
           <circle cx="12" cy="12" r="10" fill="none"/>
           <text x="12" y="16" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold">i</text>
         </svg>
       </button>
     </h1>
-    <p id="mensaje-juego">Puntos:<input type="number" id="meta-puntos" value="5000" min="100" style="width:80px; text-align:center;"></p>
-    <div class="acciones">
-      <button onclick="window.location.href='juegos.html'">← A juegos</button>
-      <button onclick="limpiarPuntuaciones()">🧹 Borrar</button>
-      <button onclick="window.location.href='gestion_jugadores.html'">👥 Jugadores</button>
-      <button onclick="agregarFila()">➕ Añadir fila</button>
-    </div>
-  </header>
+    <p id="mensaje-juego">
+      Puntos:
+      <input type="number" id="meta-puntos" value="5000" min="100" style="width:80px; text-align:center;">
+    </p>
+  </div>
 
-  <main class="marcador">
-    <div class="tabla">
-      <table id="tabla-puntos">
-        <thead>
-          <tr id="fila-totales"></tr>
-          <tr id="fila-nombres"></tr>
-        </thead>
-        <tbody id="cuerpo-tabla"></tbody>
-      </table>
-    </div>
-  </main>
+  <!-- Botones: se quedan dentro del header -->
+  <div class="acciones">
+    <button onclick="window.location.href='juegos.html'">← A juegos</button>
+    <button onclick="limpiarPuntuaciones()">🧹 Borrar</button>
+    <button onclick="window.location.href='gestion_jugadores.html'">👥 Jugadores</button>
+    <button onclick="agregarFila()">➕ Añadir fila</button>
+  </div>
+</header>
+
+
+<main class="marcador">
+  <div class="tabla">
+    <table id="tabla-puntos">
+      <thead>
+        <tr id="fila-totales"></tr>
+        <tr id="fila-nombres"></tr>
+      </thead>
+      <tbody id="cuerpo-tabla"></tbody>
+    </table>
+  </div>
+</main>
+
 
   <!-- Modal de ayuda -->
   <div id="modal-ayuda" class="modal">

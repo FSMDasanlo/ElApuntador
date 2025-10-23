@@ -1047,3 +1047,31 @@ header p#mensaje-juego {
     font-size: 0.85rem;
   }
 }
+header .acciones {
+  margin-top: 1rem;         /* separación del texto de puntos */
+  margin-bottom: 0.8rem;    /* separación de la tabla */
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+/* --- Ajuste para que el header sea vertical en la pantalla de juego --- */
+/* Ajuste de separación entre botones y tabla en la pantalla de juego */
+body.juego header {
+  margin-bottom: 0.5rem; /* antes 1.5rem o 2rem, ahora más compacto */
+}
+
+body.juego header .acciones {
+  margin-top: 0.3rem;
+  margin-bottom: 0.3rem; /* antes 0.8rem */
+  gap: 0.8rem;           /* botones un poco más juntos */
+}
+.fila-b, .fila-b td {
+  background-color: #fff9c4; /* amarillo suave */
+}
+.fila-b {
+  background-color: #fff9c4 !important; /* amarillo suave */
+}
+.fila-b td {
+  background-color: #fff9c4 !important;
+}
