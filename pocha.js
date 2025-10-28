@@ -157,11 +157,12 @@ document.addEventListener("DOMContentLoaded", () => {
     calcularPuntuaciones();
   }
 
+// pocha.js - Función manejarInputCelda
   function manejarInputCelda(e) {
     const cell = e.target;
     // Permite números y el signo menos (-) para puntuaciones negativas
-    cell.textContent = cell.textContent.replace(/[^0-9-]/g, "");
-
+    cell.textContent = cell.textContent.replace(/[^0-9-]/g, ""); // <--- Esto ya acepta el '-'
+    
     guardarPuntuaciones();
     calcularPuntuaciones();
     actualizarRanking();
