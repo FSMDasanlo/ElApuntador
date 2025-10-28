@@ -17,20 +17,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let rondas = [];
     
-    // Rondas Ascendentes
+    // 1. Rondas Ascendentes
     for (let i = 1; i <= maxCartas; i++) {
-      // Repetir el 1 (nJugadores veces)
-      const rep = (i === 1) ? nJugadores : 1;
-      for (let r = 0; r < rep; r++) rondas.push(i);
-    }
-    
-    // Rondas Descendentes
-    for (let i = maxCartas; i >= 1; i--) {
-        // Repetir maxCartas y 1 (nJugadores veces)
-        const rep = (i === maxCartas || i === 1) ? nJugadores : 1;
+        let rep = 1;
+        
+        // Repetir la ronda de 1 carta N veces (al inicio)
+        if (i === 1) { 
+            rep = nJugadores;
+        }
+        // Repetir la ronda de MaxCartas N veces (al final del ascenso)
+        if (i === maxCartas) {
+            rep = nJugadores;
+        }
+        
         for (let r = 0; r < rep; r++) rondas.push(i);
     }
-
+    
+    // 2. Rondas Descendentes (El "descenso" entre la ronda Max y el 1)
+    // Empieza desde maxCartas - 1 y va hasta 2
+    for (let i = maxCartas - 1; i >= 2; i--) {
+        rondas.push(i);
+    }
+    
+    // 3. Rondas de 1 carta al final (si maxCartas es > 1)
+    // Repetir la ronda de 1 carta N veces (al final del juego)
+    if (maxCartas > 1) {
+        for (let r = 0; r < nJugadores; r++) {
+             rondas.push(1);
+        }
+    }
+    
     // Retorna una lista única y secuencial de todas las rondas del juego
     return { todas: rondas, maxCartas: maxCartas };
   }

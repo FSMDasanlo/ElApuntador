@@ -1,54 +1,73 @@
-// voz.js
+// voz.js - Versión Mejorada
 
 document.addEventListener('DOMContentLoaded', () => {
   const btnVoz = document.getElementById('btn-voz');
   const btnDetenerVoz = document.getElementById('btn-detener-voz'); 
   const synth = window.speechSynthesis;
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  
+  // --- Configuración de Gramática (Mejora clave) ---
+  const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+  const numbers = 'cero | uno | dos | tres | cuatro | cinco | seis | siete | ocho | nueve | diez | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10';
+  const grammar = `#JSGF V1.0; grammar numbers; public <number> = ${numbers} ;`;
+  const speechRecognitionList = SpeechGrammarList ? new SpeechGrammarList() : null;
+  if(speechRecognitionList) speechRecognitionList.addFromString(grammar, 1);
+  // ----------------------------------------------------
+
   let recog = SpeechRecognition ? new SpeechRecognition() : null;
   let isRecording = false; 
-  let currentResolve = null; // Para resolver la promesa de 'escuchar'
+  let currentResolve = null; 
 
   if(!recog){
     alert('Tu navegador no soporta reconocimiento de voz.');
     return;
   }
 
-  recog.lang = 'es-ES';
+  // --- Aplicando mejoras ---
+  recog.lang = 'es'; // Lenguaje genérico 'es' en lugar de 'es-ES'
   recog.interimResults = false;
   recog.maxAlternatives = 1;
-  recog.continuous = true; // 🌟 CLAVE: Mantener la escucha activa para toda la ronda
+  recog.continuous = true; 
+  if(speechRecognitionList) recog.grammars = speechRecognitionList; // Aplicar la gramática
+  // -------------------------
 
   // --- MANEJADORES GLOBALES DE EVENTOS ---
   recog.onresult = e => {
-    // Solo si estamos esperando activamente la entrada (currentResolve está configurado)
     if (currentResolve) {
-      // Obtenemos la última transcripción
       const transcript = e.results[e.results.length - 1][0].transcript;
       const resolveFn = currentResolve;
-      currentResolve = null; // Limpiamos el resolvedor
-      resolveFn(transcript); // Resolvemos la promesa en escuchar()
+      currentResolve = null; 
+      resolveFn(transcript.trim()); // Limpiamos espacios
     }
   };
 
   recog.onerror = e => {
     console.error('Error de reconocimiento:', e.error);
-    // Si ocurre un error, debemos desbloquear la promesa actual y detener la ronda.
     if(currentResolve) {
         const resolveFn = currentResolve;
         currentResolve = null;
-        resolveFn(''); // Desbloqueamos la espera
+        resolveFn(''); 
     }
-    // Solo detenemos si no es un error de permiso inicial
     if (e.error !== 'not-allowed') { 
         detenerRonda();
     }
   };
   
   recog.onend = () => {
-    // En modo continuo, onend solo se dispara si llamamos a recog.stop() o por un error fatal.
     if(isRecording) {
-        detenerRonda();
+        // Reiniciar la grabación automáticamente si termina sin una llamada a stop() explícita
+        // Esto es un parche común para algunos navegadores en modo 'continuous: true'
+        if(currentResolve) {
+            console.log("Reiniciando reconocimiento de voz...");
+            try {
+                recog.start();
+            } catch(e) {
+                console.warn("Fallo al reiniciar la grabación:", e);
+                detenerRonda();
+            }
+        } else {
+            detenerRonda();
+        }
     }
   }
   // --- FIN MANEJADORES GLOBALES ---
@@ -64,8 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function escuchar(){
-    // Esta función ahora solo crea una promesa y la almacena.
-    // El manejador global recog.onresult la resolverá cuando escuche algo.
     return new Promise(res => {
       if(!isRecording) { res(''); return; } 
       currentResolve = res;
@@ -75,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function detenerRonda() {
     isRecording = false;
     try {
-        recog.stop(); // Detener la sesión continua
+        recog.stop(); 
     } catch(e) { /* Ignorar si ya está detenida */ }
     synth.cancel(); 
     btnVoz.disabled = false;
@@ -101,17 +118,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     
-    // 🌟 CLAVE: Iniciar la sesión continua UNA SOLA VEZ
     try {
         recog.start(); 
     } catch (e) {
-        console.warn("Recognition start failed, assuming already started or error:", e);
+        console.warn("Recognition start failed, trying to continue:", e);
     }
 
     // Lógica para encontrar la columna actual
     const nCols = tabla.tHead.rows[1].cells.length; 
     let colActual = -1;
     for(let c=1;c<=nCols;c++){
+      // Busca la primera columna de ronda vacía
       if(filas.some(f => f.cells[c].textContent==='')){ colActual = c; break; }
     }
 
@@ -139,9 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Bucle de reintento (máx. 3 veces)
       while((!resp || isNaN(parseInt(resp))) && intentos < 3 && isRecording){ 
           if (intentos > 0) {
-              await hablar('Por favor, repite el número.');
+              // --- Mensaje más explícito (Mejora) ---
+              await hablar(`No he entendido. Por favor, di solo el número de bazas para ${nombre}.`);
+              // --------------------------------------
           }
-          // 💡 escuchar() ahora solo espera el resultado de la sesión continua
           resp = await escuchar(); 
           intentos++;
       }
@@ -151,8 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if(!isNaN(num)){
         f.cells[colActual].textContent = num;
       } else if (isRecording) { 
-        await hablar('No he entendido el número después de varios intentos. Pasando al siguiente jugador.');
-        f.cells[colActual].textContent = ''; 
+        await hablar(`No he entendido el número después de varios intentos. Poniendo cero para ${nombre}.`);
+        f.cells[colActual].textContent = '0'; // Poner 0 si no se entiende
       }
     }
     

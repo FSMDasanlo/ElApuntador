@@ -59,10 +59,10 @@
     </h1>
 <div class="acciones">
   <button onclick="window.location.href='juegos.html'">← A juegos</button>
-  <button onclick="limpiarPuntuaciones()">🧹 Borrar</button>
-  <button onclick="window.location.href='gestion_jugadores.html'">👥 Jugadores</button>
-  <button onclick="agregarJugador()">➕ jugador</button>
-  <button id="btn-voz">🎤 Ronda por voz</button>
+    <button onclick="window.location.href='gestion_jugadores.html'">👥 Jugadores</button>
+	<!-- <<button onclick="agregarJugador()">➕ jugador</button> -->
+    <button onclick="limpiarPuntuaciones()">🧹 Borrar</button>
+  <button id="btn-voz">🎤 puntos x voz</button>
   <button id="btn-detener-voz" style="display:none; background-color: #e74c3c; color: white; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-weight: bold; cursor: pointer;">🛑 Detener voz</button> 
 </div>
 
@@ -78,11 +78,18 @@
     </div>
   </main>
 
+ <!-- Modal de ayuda -->
   <div id="modal-ayuda" class="modal">
     <div class="modal-contenido">
       <span class="cerrar">&times;</span>
       <h2>Instrucciones</h2>
-      <p>La pocha es un juego de cartas en el que el objetivo es acertar el número exacto de bazas que se ganarán en cada mano...</p>
+      <p>La pocha es un juego de cartas en el que el objetivo es acertar el número exacto de bazas que se ganarán en cada mano.</p>
+      <p>Se juega con una baraja española. Se reparten cartas de forma ascendente hasta el máximo, y luego descendente. Ganas puntos si aciertas tu predicción.</p>
+      <ul>
+        <li><strong>Objetivo:</strong> acertar las bazas que ganarás.</li>
+        <li><strong>Puntuación:</strong> aciertas = 10 + 5×bazas; fallas = –5×diferencia.</li>
+        <li><strong>Final:</strong> gana quien tenga más puntos al final del ciclo.</li>
+      </ul>
     </div>
   </div>
 
