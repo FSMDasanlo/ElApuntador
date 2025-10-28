@@ -610,7 +610,7 @@ body.juego {
   background: #f0f4f8;
   min-height: 100vh;
   margin: 0;
-  padding: 2rem;
+  padding: 2rem 1rem; /* Ajustado el padding */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -619,16 +619,16 @@ body.juego {
 /* Encabezado */
 header {
   width: 100%;
-  max-width: 1000px;
+  max-width: 1200px; /* Aumentado para tablas */
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem; /* Compactado */
 }
 
 header h1 {
   font-size: 2rem;
   font-weight: 600;
   color: #333;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem; /* Compactado */
 }
 
 /* Botones centrados */
@@ -663,85 +663,161 @@ header .acciones button:nth-child(3):hover {
   background: #d78a1c;
 }
 
-/* Contenedor principal */
+/* Contenedor principal (MARCADOR Y LAYOUT DE 2 COLUMNAS) */
 main.marcador {
   width: 100%;
-  max-width: 1000px;
-  display: flex;
-  justify-content: center;
+  max-width: 1200px; /* Ancho máximo para el layout de 2 columnas */
+  display: grid;
+  grid-template-columns: minmax(250px, 1fr) 3fr; /* Ranking | Tablas */
+  gap: 1.5rem;
+  margin: 0 auto;
 }
 
-main.marcador .tabla {
-  width: 100%;
-  overflow-x: auto;
-  background: #fff;
-  padding: 1rem;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+/* Estilo para el Ranking */
+.ranking {
+    grid-column: 1 / 2; /* Primera columna */
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Contenedor de las dos tablas */
+#tablas-rondas-wrapper {
+    grid-column: 2 / 3; /* Segunda columna */
+    width: 100%;
+    /* Estilos de caja contenedora para ambas tablas */
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    overflow: hidden; /* Importante para bordes */
+}
+
+#tablas-rondas {
+    display: flex;
+    width: 100%;
+}
+
+.tabla-ronda {
+    flex-basis: 50%; /* Ambas tablas ocupan la mitad */
+    overflow-x: auto; /* Permite scroll horizontal en cada tabla */
+    background: #fff;
+    padding: 0;
+    box-shadow: none;
+}
+/* Estilos del encabezado de cada tabla */
+.tabla-ronda h3 {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #4a90e2;
+    margin: 0;
+    padding: 0.5rem 0;
+    background: #eef6ff;
+    border-bottom: 1px solid #ccc;
+    white-space: nowrap;
 }
 
 /* Tabla de puntuación */
-#tabla-puntos {
+#tabla-puntos-ascendente, #tabla-puntos-descendente {
   width: 100%;
   border-collapse: collapse;
   font-size: 1rem;
 }
 
-#tabla-puntos th, #tabla-puntos td {
+#tabla-puntos-ascendente th, #tabla-puntos-descendente th, 
+#tabla-puntos-ascendente td, #tabla-puntos-descendente td {
   border: 1px solid #e0e0e0;
-  padding: 0.6rem;
+  padding: 0.6rem 0.3rem; /* Padding ajustado para más columnas */
   text-align: center;
 }
 
-#tabla-puntos th {
+#tabla-puntos-ascendente th, #tabla-puntos-descendente th {
   background: #4a90e2;
   color: white;
   font-weight: 600;
 }
 
-#tabla-puntos td[contenteditable="true"] {
+#tabla-puntos-ascendente td[contenteditable="true"], #tabla-puntos-descendente td[contenteditable="true"] {
   background: #f9f9f9;
   cursor: text;
   transition: background 0.2s;
 }
 
-#tabla-puntos td[contenteditable="true"]:hover {
+#tabla-puntos-ascendente td[contenteditable="true"]:hover, #tabla-puntos-descendente td[contenteditable="true"]:hover {
   background: #eef6ff;
 }
 
-#tabla-puntos td[contenteditable="true"]:focus {
+#tabla-puntos-ascendente td[contenteditable="true"]:focus, #tabla-puntos-descendente td[contenteditable="true"]:focus {
   outline: 2px solid #4a90e2;
   background: #ffffff;
 }
 
-#tabla-puntos td.total {
-  font-weight: bold;
-  background: #e8f8e8;
-  transition: background-color 0.3s;
-  font-size: 1.05rem;
+/* Columna Jugador y Total (solo en Ascendente) */
+#tabla-puntos-ascendente td.jugador { 
+    text-align: left; 
+    font-weight: bold; 
+    min-width: 100px; 
+    background-color: #f5f5f5; 
+    border-right: 2px solid #4a90e2; /* Borde de separación */
+}
+#tabla-puntos-ascendente td.total {
+    font-weight: 800; 
+    background-color: #e0f7fa; 
+    color: #00796b;
+    border-right: 2px solid #4a90e2; /* Borde de separación */
+}
+#tabla-puntos-ascendente th:first-child, #tabla-puntos-ascendente th:last-child { 
+    border-right: 2px solid #4a90e2; 
 }
 
-/* Destacar max y min */
-#tabla-puntos td.total[maximo] {
-  background: #a8f0a1;
-}
-#tabla-puntos td.total[minimo] {
-  background: #ffd7a1;
-}
-/* Responsive */
-@media (max-width: 700px) {
-  #tabla-puntos {
-    font-size: 0.85rem;
-  }
 
-  header .acciones {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
+/* Unión visual de la tabla Descendente (sin borde izquierdo) */
+#tabla-puntos-descendente th:first-child {
+    border-left: none;
+}
+#tabla-puntos-descendente tbody tr td:first-child {
+    border-left: none;
+}
 
-  header h1 {
-    font-size: 1.6rem;
-  }
+/* Responsive (el layout vuelve a ser vertical) */
+@media (max-width: 900px) {
+    main.marcador {
+        grid-template-columns: 1fr; /* Una sola columna */
+        gap: 1rem;
+        max-width: 700px; /* Reducir ancho máximo */
+    }
+    .ranking {
+        grid-column: 1 / 2;
+    }
+    #tablas-rondas-wrapper {
+        grid-column: 1 / 2;
+        /* Estilos de caja contenedora para ambas tablas */
+        padding: 1rem; /* Añadir padding si es una sola caja */
+    }
+    #tablas-rondas {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .tabla-ronda {
+        width: 100%;
+        padding: 0;
+    }
+    #tabla-puntos-descendente th:first-child, #tabla-puntos-descendente tbody tr td:first-child {
+        border-left: 1px solid #e0e0e0; /* Restaurar borde izquierdo */
+    }
+    #tabla-puntos-ascendente td.jugador { border-right: 1px solid #e0e0e0; }
+    #tabla-puntos-ascendente td.total { border-right: 1px solid #e0e0e0; }
+    #tabla-puntos-ascendente th:first-child, #tabla-puntos-ascendente th:last-child { border-right: 1px solid #e0e0e0; }
+
+    header .acciones {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    header h1 {
+        font-size: 1.6rem;
+    }
 }
 header h1#nombre-juego {
   font-size: 2rem;
@@ -755,35 +831,6 @@ header p#mensaje-juego {
   color: #555;
   margin: 0.2rem 0 0.8rem 0;
 }
-.ranking {
-  margin-top: 1rem;
-  text-align: center;
-  font-size: 1rem;
-  color: #333;
-}
-
-.ranking h3 {
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-  color: #4a90e2;
-}
-
-.ranking ol {
-  padding-left: 1rem;
-}
-
-.ranking li {
-  margin-bottom: 0.3rem;
-}
-/* Resaltar top3 en tabla de puntuaciones */
-#tabla-puntos tbody tr {
-  transition: background 0.5s;
-}
-
-#tabla-puntos tbody tr.top1 { background: #d4f0d4; } /* verde */
-#tabla-puntos tbody tr.top2 { background: #d4e8f0; } /* azul */
-#tabla-puntos tbody tr.top3 { background: #ffe5cc; } /* naranja suave */
-
 /* Ranking en vivo */
 .ranking {
   margin-top: 1rem;
@@ -1048,23 +1095,23 @@ header p#mensaje-juego {
   }
 }
 header .acciones {
-  margin-top: 1rem;         /* separación del texto de puntos */
-  margin-bottom: 0.8rem;    /* separación de la tabla */
+  margin-top: 0.3rem;    /* Ajustado para el nuevo header */
+  margin-bottom: 0.3rem; /* Ajustado para el nuevo header */
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.8rem;
 }
 /* --- Ajuste para que el header sea vertical en la pantalla de juego --- */
 /* Ajuste de separación entre botones y tabla en la pantalla de juego */
 body.juego header {
-  margin-bottom: 0.5rem; /* antes 1.5rem o 2rem, ahora más compacto */
+  margin-bottom: 0.5rem;
 }
 
 body.juego header .acciones {
   margin-top: 0.3rem;
-  margin-bottom: 0.3rem; /* antes 0.8rem */
-  gap: 0.8rem;           /* botones un poco más juntos */
+  margin-bottom: 0.3rem; 
+  gap: 0.8rem;
 }
 .fila-b, .fila-b td {
   background-color: #fff9c4; /* amarillo suave */

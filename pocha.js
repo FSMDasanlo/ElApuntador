@@ -1,12 +1,20 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const cuerpoTabla = document.getElementById("cuerpo-tabla");
-  const tabla = document.getElementById("tabla-puntos");
+  // 1. OBTENER REFERENCIAS A LAS NUEVAS TABLAS
+  const cuerpoTablaAsc = document.getElementById("cuerpo-tabla-ascendente");
+  const tablaAsc = document.getElementById("tabla-puntos-ascendente");
+  const cuerpoTablaDesc = document.getElementById("cuerpo-tabla-descendente");
+  const tablaDesc = document.getElementById("tabla-puntos-descendente");
 
+  // El ranking lo vincularemos al contenedor principal del marcador
+  const marcador = document.querySelector(".marcador");
+  
   // Ranking setup
   const rankingContainer = document.createElement("div");
   rankingContainer.className = "ranking";
   rankingContainer.innerHTML = "<h3>Ranking en vivo</h3><ol id='ranking-list'></ol>";
-  tabla.parentNode.appendChild(rankingContainer);
+  
+  // Lo añadimos al inicio del contenedor principal del marcador (para el layout grid)
+  marcador.prepend(rankingContainer);
 
   let jugadores = JSON.parse(localStorage.getItem("jugadores")) || [];
 
@@ -15,7 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Asume un juego de baraja de 40 cartas
     const maxCartas = Math.floor(40 / nJugadores) || 1;
 
-    let rondas = [];
+    let rondasAscendentes = [];
+    let rondasDescendentes = [];
     
     // 1. Rondas Ascendentes
     for (let i = 1; i <= maxCartas; i++) {
@@ -30,57 +39,65 @@ document.addEventListener("DOMContentLoaded", () => {
             rep = nJugadores;
         }
         
-        for (let r = 0; r < rep; r++) rondas.push(i);
+        for (let r = 0; r < rep; r++) rondasAscendentes.push(i);
     }
     
     // 2. Rondas Descendentes (El "descenso" entre la ronda Max y el 1)
     // Empieza desde maxCartas - 1 y va hasta 2
     for (let i = maxCartas - 1; i >= 2; i--) {
-        rondas.push(i);
+        rondasDescendentes.push(i);
     }
     
     // 3. Rondas de 1 carta al final (si maxCartas es > 1)
     // Repetir la ronda de 1 carta N veces (al final del juego)
     if (maxCartas > 1) {
         for (let r = 0; r < nJugadores; r++) {
-             rondas.push(1);
+             rondasDescendentes.push(1);
         }
     }
     
-    // Retorna una lista única y secuencial de todas las rondas del juego
-    return { todas: rondas, maxCartas: maxCartas };
+    // Retorna un objeto con las dos listas de rondas y la lista total
+    return { 
+        ascendentes: rondasAscendentes, 
+        descendentes: rondasDescendentes,
+        todas: rondasAscendentes.concat(rondasDescendentes),
+        maxCartas: maxCartas 
+    };
   }
 
   let rondasActuales = generarRondas();
 
-  function inicializarTabla() {
+  /**
+   * Función auxiliar para inicializar una tabla específica
+   * Se incluye la columna Total en ambas tablas.
+   */
+  function inicializarTabla(tabla, cuerpoTabla, rondas, esTablaAscendente) {
     cuerpoTabla.innerHTML = "";
     const thead = tabla.tHead;
     thead.innerHTML = "";
 
-    if (jugadores.length === 0) return;
+    // Si no hay jugadores, se detiene aquí y la tabla queda vacía
+    if (jugadores.length === 0) return; 
     
-    // ------------------------------------------
-    // MODIFICACIÓN: CABECERA DE DOS NIVELES
-    // ------------------------------------------
-    const numRondas = rondasActuales.todas.length;
+    const numRondas = rondas.length;
 
-    // Fila 1: "Jugador" (rowspan 2), "NUMERO DE CARTAS" (colspan N), "Total" (rowspan 2)
+    // Fila 1: "Jugador" (rowspan 2), "RONDA X" (colspan N), "Total" (rowspan 2)
     const trRondasPrincipal = document.createElement("tr");
 
-    // Columna Jugador (ocupa dos filas)
+    // 1. Columna Jugador (ocupa dos filas)
     let thJugador = document.createElement("th");
     thJugador.textContent = "Jugador";
     thJugador.setAttribute("rowspan", "2");
     trRondasPrincipal.appendChild(thJugador);
 
-    // Columna "NUMERO DE CARTAS" (ocupa todas las columnas de rondas)
+
+    // Columna "RONDA" (ocupa todas las columnas de rondas)
     let thCartas = document.createElement("th");
-    thCartas.textContent = "NUMERO DE CARTAS";
-    thCartas.setAttribute("colspan", numRondas);
+    thCartas.textContent = esTablaAscendente ? "Número de cartas" : "Número de cartas";
+    thCartas.setAttribute("colspan", numRondas); 
     trRondasPrincipal.appendChild(thCartas);
 
-    // Columna Total (ocupa dos filas)
+    // 2. Columna Total (ocupa dos filas)
     let thTotal = document.createElement("th");
     thTotal.textContent = "Total";
     thTotal.setAttribute("rowspan", "2");
@@ -90,9 +107,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Fila 2: Números de las rondas (1, 1, 1, 2, 3...)
     const trRondasSecundaria = document.createElement("tr");
-    rondasActuales.todas.forEach((nCartas, index) => {
+    rondas.forEach((nCartas) => {
       const th = document.createElement("th");
-      // Muestra solo el número de cartas
       th.textContent = nCartas; 
       trRondasSecundaria.appendChild(th);
     });
@@ -102,19 +118,29 @@ document.addEventListener("DOMContentLoaded", () => {
     // FILAS DE JUGADORES
     jugadores.forEach(nombre => {
       const tr = document.createElement("tr");
+      tr.setAttribute('data-jugador', nombre); // Para identificar la fila
 
       // Celda de nombre
       const tdNombre = document.createElement("td");
       tdNombre.textContent = nombre;
       tdNombre.classList.add("jugador");
       tr.appendChild(tdNombre);
+      
+      
+      // La posición de la ronda en el array 'rondasActuales.todas' es clave para guardar/cargar
+      const offset = esTablaAscendente ? 0 : rondasActuales.ascendentes.length;
 
       // Celdas de puntuación por ronda
-      rondasActuales.todas.forEach((_, index) => {
+      rondas.forEach((_, index) => {
         const td = document.createElement("td");
-        td.className = `ronda-${index}`;
+        // El índice de la columna en el array TOTAL es (offset + index)
+        td.className = `ronda-${offset + index}`; 
         td.contentEditable = "true";
         td.addEventListener("input", manejarInputCelda);
+        
+        // Listener para la navegación con Enter
+        td.addEventListener("keydown", manejarKeydownCelda); 
+
         tr.appendChild(td);
       });
 
@@ -126,20 +152,85 @@ document.addEventListener("DOMContentLoaded", () => {
 
       cuerpoTabla.appendChild(tr);
     });
+  }
 
+  // Función para manejar el Enter (navegar hacia abajo)
+  function manejarKeydownCelda(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault(); 
+      
+      const currentCell = e.target;
+      const currentRow = currentCell.parentNode;
+      
+      // 1. Encontrar el índice de la columna
+      let columnIndex = Array.from(currentRow.cells).indexOf(currentCell);
+
+      // 2. Encontrar la siguiente fila
+      const nextRow = currentRow.nextElementSibling;
+      
+      if (nextRow) {
+        // 3. Intentar enfocar la celda en la misma columna de la siguiente fila
+        const targetCell = nextRow.cells[columnIndex];
+
+        if (targetCell && targetCell.getAttribute('contenteditable') === 'true') {
+          targetCell.focus();
+        } else {
+          currentCell.blur();
+        }
+        
+      } else {
+        currentCell.blur();
+      }
+      
+      // Se guarda y actualiza después de la entrada
+      guardarPuntuaciones();
+      calcularPuntuaciones();
+      actualizarRanking();
+    }
+  }
+
+  function manejarInputCelda(e) {
+    // La validación de números
+    e.target.textContent = e.target.textContent.replace(/[^0-9-]/g, "");
+    
+    guardarPuntuaciones();
+    calcularPuntuaciones();
+    actualizarRanking();
+  }
+
+  function inicializarTablas() {
+    
+    // Limpiar y crear la tabla Ascendente
+    inicializarTabla(tablaAsc, cuerpoTablaAsc, rondasActuales.ascendentes, true);
+    
+    // Limpiar y crear la tabla Descendente
+    inicializarTabla(tablaDesc, cuerpoTablaDesc, rondasActuales.descendentes, false);
+    
     cargarPuntuaciones();
     calcularPuntuaciones();
     actualizarRanking();
   }
-  
+
   function guardarPuntuaciones() {
     const data = {};
-    Array.from(cuerpoTabla.rows).forEach(row => {
+    Array.from(cuerpoTablaAsc.rows).forEach(row => { 
       const nombre = row.cells[0].textContent;
       const puntos = [];
-      for (let i = 1; i < row.cells.length - 1; i++) {
+      
+      // 1. Puntos de la tabla ascendente (desde la celda 1 hasta la penúltima, saltando Total)
+      for (let i = 1; i < row.cells.length - 1; i++) { 
         puntos.push(row.cells[i].textContent);
       }
+      
+      // 2. Puntos de la tabla descendente 
+      const filaDesc = cuerpoTablaDesc.querySelector(`tr[data-jugador="${nombre}"]`);
+      if (filaDesc) {
+          // Empezamos desde la celda 1 (saltando Nombre), y paramos antes de la última celda (Total)
+          for (let i = 1; i < filaDesc.cells.length - 1; i++) { 
+            puntos.push(filaDesc.cells[i].textContent);
+          }
+      }
+      
       data[nombre] = puntos;
     });
     localStorage.setItem("puntuacionesPocha", JSON.stringify(data));
@@ -147,35 +238,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function cargarPuntuaciones() {
     const data = JSON.parse(localStorage.getItem("puntuacionesPocha")) || {};
-    Array.from(cuerpoTabla.rows).forEach(row => {
-      const nombre = row.cells[0].textContent;
+    const lenAsc = rondasActuales.ascendentes.length;
+    
+    Array.from(cuerpoTablaAsc.rows).forEach(rowAsc => {
+      const nombre = rowAsc.cells[0].textContent;
       const puntos = data[nombre] || [];
-      for (let i = 0; i < puntos.length && i < row.cells.length - 2; i++) {
-        row.cells[i + 1].textContent = puntos[i];
+      
+      // Referencia a la fila descendente
+      const rowDesc = cuerpoTablaDesc.querySelector(`tr[data-jugador="${nombre}"]`);
+      
+      // Cargar puntos en tabla ascendente (va desde el índice 1 hasta el penúltimo)
+      for (let i = 0; i < lenAsc; i++) {
+        // i+1 porque la columna 0 es el nombre del jugador
+        if (i < puntos.length) rowAsc.cells[i + 1].textContent = puntos[i];
+      }
+      
+      // Cargar puntos en tabla descendente (va desde el índice 1 hasta el penúltimo)
+      if (rowDesc) {
+        for (let i = 0; i < rondasActuales.descendentes.length; i++) {
+          const puntoIndex = lenAsc + i;
+          // i+1 porque la columna 0 es el nombre del jugador
+          if (puntoIndex < puntos.length) rowDesc.cells[i + 1].textContent = puntos[puntoIndex];
+        }
       }
     });
-    calcularPuntuaciones();
-  }
-
-// pocha.js - Función manejarInputCelda
-  function manejarInputCelda(e) {
-    const cell = e.target;
-    // Permite números y el signo menos (-) para puntuaciones negativas
-    cell.textContent = cell.textContent.replace(/[^0-9-]/g, ""); // <--- Esto ya acepta el '-'
-    
-    guardarPuntuaciones();
-    calcularPuntuaciones();
-    actualizarRanking();
   }
 
   function calcularPuntuaciones() {
-    Array.from(cuerpoTabla.rows).forEach(row => {
+    // Calculamos siempre usando la tabla ascendente como referencia de las filas
+    Array.from(cuerpoTablaAsc.rows).forEach(rowAsc => {
       let suma = 0;
-      for (let i = 1; i < row.cells.length - 1; i++) {
-        const val = parseInt(row.cells[i].textContent || 0);
+      const nombre = rowAsc.cells[0].textContent;
+      
+      // Referencia a la fila descendente
+      const rowDesc = cuerpoTablaDesc.querySelector(`tr[data-jugador="${nombre}"]`);
+
+      // Sumar puntos de la tabla ascendente (Desde la celda 1 hasta la penúltima)
+      for (let i = 1; i < rowAsc.cells.length - 1; i++) {
+        const val = parseInt(rowAsc.cells[i].textContent || 0);
         if (!isNaN(val)) suma += val;
       }
-      row.querySelector(".total").textContent = suma;
+      
+      // Sumar puntos de la tabla descendente (Desde la celda 1 hasta la penúltima)
+      if (rowDesc) {
+        for (let i = 1; i < rowDesc.cells.length - 1; i++) {
+          const val = parseInt(rowDesc.cells[i].textContent || 0);
+          if (!isNaN(val)) suma += val;
+        }
+      }
+      
+      // Actualizar el total en AMBAS filas
+      rowAsc.querySelector(".total").textContent = suma;
+      if (rowDesc) {
+          rowDesc.querySelector(".total").textContent = suma;
+      }
     });
   }
 
@@ -183,28 +299,54 @@ document.addEventListener("DOMContentLoaded", () => {
     const rankingList = document.getElementById("ranking-list");
     rankingList.innerHTML = "";
 
-    const datos = Array.from(cuerpoTabla.rows).map(row => {
+    // Obtenemos los datos de la tabla ascendente (que ahora tienen el mismo Total que la descendente)
+    const datos = Array.from(cuerpoTablaAsc.rows).map(row => {
       const nombre = row.cells[0].textContent;
       const puntos = parseInt(row.querySelector(".total").textContent || 0);
-      return { nombre, puntos };
+      return { nombre, puntos, row };
     });
     
     datos.sort((a, b) => b.puntos - a.puntos);
 
+    // Resetear y aplicar clases de ranking a AMBAS tablas
+    Array.from(document.querySelectorAll("#cuerpo-tabla-ascendente tr, #cuerpo-tabla-descendente tr")).forEach(row => {
+        row.classList.remove("top1", "top2", "top3");
+    });
+    
     datos.forEach((jug, idx) => {
       const li = document.createElement("li");
       li.textContent = `${idx + 1}. ${jug.nombre} → ${jug.puntos}`;
       rankingList.appendChild(li);
+      
+      // Fila ascendente
+      if (idx === 0) jug.row.classList.add("top1");
+      if (idx === 1) jug.row.classList.add("top2");
+      if (idx === 2) jug.row.classList.add("top3");
+      
+      // Fila descendente (buscada por el atributo data-jugador)
+      const rowDesc = cuerpoTablaDesc.querySelector(`tr[data-jugador="${jug.nombre}"]`);
+      if (rowDesc) {
+          if (idx === 0) rowDesc.classList.add("top1");
+          if (idx === 1) rowDesc.classList.add("top2");
+          if (idx === 2) rowDesc.classList.add("top3");
+      }
     });
   }
 
   window.limpiarPuntuaciones = function() {
     if(!confirm("¿Estás seguro de que quieres borrar todas las puntuaciones?")) return;
     
-    Array.from(cuerpoTabla.rows).forEach(row => {
+    // Limpiar la tabla ascendente (columnas de datos: índice 1 hasta la penúltima)
+    Array.from(cuerpoTablaAsc.rows).forEach(row => {
       for (let i = 1; i < row.cells.length - 1; i++) row.cells[i].textContent = "";
       row.querySelector(".total").textContent = 0;
     });
+    // Limpiar la tabla descendente (columnas de datos: índice 1 hasta la penúltima)
+    Array.from(cuerpoTablaDesc.rows).forEach(row => {
+      for (let i = 1; i < row.cells.length - 1; i++) row.cells[i].textContent = "";
+      row.querySelector(".total").textContent = 0; 
+    });
+    
     guardarPuntuaciones();
     actualizarRanking();
   }
@@ -214,10 +356,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (nombre && !jugadores.includes(nombre)) {
       jugadores.push(nombre);
       localStorage.setItem("jugadores", JSON.stringify(jugadores));
-      inicializarTabla();
+      inicializarTablas(); // Recargar la vista
     }
   }
 
   // Inicializar al cargar la página
-  inicializarTabla();
+  inicializarTablas();
+  
+  // Exponer variables y funciones para voz.js
+  window.rondasActuales = rondasActuales;
+  window.calcularPuntuaciones = calcularPuntuaciones;
+  window.actualizarRanking = actualizarRanking;
 });

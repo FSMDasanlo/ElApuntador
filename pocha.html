@@ -9,7 +9,7 @@
   <script src="voz.js" defer></script>
 
   <style>
-    /* ===== Modal de ayuda ===== */
+    /* ===== Modal de ayuda (Sin cambios) ===== */
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.5); }
     .modal-contenido { background-color: #fff; margin: 10% auto; padding: 1.5rem; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
     .modal-contenido h2 { color: #4a90e2; margin-bottom: 1rem; }
@@ -41,8 +41,35 @@
       transform: scale(1.05);
     }
 
-    table { border-collapse: collapse; width: 100%; margin-top: 1rem; font-size: 0.9rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: 0; font-size: 0.9rem; }
     th, td { border: 1px solid #ccc; padding: 0.3rem; text-align: center; }
+
+    /* AÑADIDO: Forzar la visualización vertical de las tablas en cualquier tamaño de pantalla */
+    #tablas-rondas {
+        display: flex;
+        flex-direction: column !important; /* Fuerza la columna */
+        gap: 20px; /* Espacio entre las tablas */
+    }
+    
+    /* AÑADIDO: Asegurar que las tablas ocupan el 100% del contenedor vertical */
+    .tabla-ronda {
+        width: 100% !important; 
+    }
+    
+    /* SOLICITUD 1: Anchura ajustada y alineación de nombres de jugadores a la derecha */
+    #tabla-puntos-ascendente td.jugador, 
+    #tabla-puntos-descendente td.jugador {
+        text-align: right !important; 
+        width: 1%; /* Ajusta la columna al contenido más largo */
+        white-space: nowrap; /* Evita que el nombre se rompa en varias líneas */
+    }
+    
+    /* SOLICITUD 2: Sombreado de la columna Total en ambas tablas */
+    #tabla-puntos-ascendente .total, 
+    #tabla-puntos-descendente .total {
+        font-weight: bold;
+        background-color: #f0f0f0; /* Color gris claro para el sombreado */
+    }
   </style>
 </head>
 
@@ -60,8 +87,7 @@
 <div class="acciones">
   <button onclick="window.location.href='juegos.html'">← A juegos</button>
     <button onclick="window.location.href='gestion_jugadores.html'">👥 Jugadores</button>
-	<!-- <<button onclick="agregarJugador()">➕ jugador</button> -->
-    <button onclick="limpiarPuntuaciones()">🧹 Borrar</button>
+	<button onclick="limpiarPuntuaciones()">🧹 Borrar</button>
   <button id="btn-voz">🎤 puntos x voz</button>
   <button id="btn-detener-voz" style="display:none; background-color: #e74c3c; color: white; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-weight: bold; cursor: pointer;">🛑 Detener voz</button> 
 </div>
@@ -69,17 +95,30 @@
   </header>
 
   <main class="marcador">
-    <div class="tabla">
-      <table id="tabla-puntos">
-        <thead>
-          </thead>
-        <tbody id="cuerpo-tabla"></tbody>
-      </table>
+    <div id="tablas-rondas-wrapper">
+      <div id="tablas-rondas">
+          
+          <div class="tabla-ronda" id="contenedor-ascendente">
+               <h3>Rondas Ascendentes (1 → Max)</h3>
+               <table id="tabla-puntos-ascendente">
+                  <thead></thead>
+                  <tbody id="cuerpo-tabla-ascendente"></tbody>
+               </table>
+          </div>
+
+          <div class="tabla-ronda" id="contenedor-descendente">
+               <h3>Rondas Descendentes (Max → 1)</h3>
+               <table id="tabla-puntos-descendente">
+                  <thead></thead>
+                  <tbody id="cuerpo-tabla-descendente"></tbody>
+               </table>
+          </div>
+          
+      </div>
     </div>
   </main>
 
- <!-- Modal de ayuda -->
-  <div id="modal-ayuda" class="modal">
+ <div id="modal-ayuda" class="modal">
     <div class="modal-contenido">
       <span class="cerrar">&times;</span>
       <h2>Instrucciones</h2>
