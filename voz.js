@@ -1,188 +1,261 @@
-// voz.js - AJUSTES PARA COMPATIBILIDAD MÓVIL
+// voz.js - Versión Final (Manejo de Permisos Corregido)
 
 document.addEventListener('DOMContentLoaded', () => {
   const btnVoz = document.getElementById('btn-voz');
   const btnDetenerVoz = document.getElementById('btn-detener-voz'); 
   const synth = window.speechSynthesis;
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  // Usar window.webkitSpeechRecognition para mayor compatibilidad
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; 
   
-  // --- Configuración de Gramática (Desactivada en móviles) ---
-  // Aunque es útil, la GRAMÁTICA (SpeechGrammarList) NO es compatible
-  // con muchos navegadores móviles y puede causar fallos.
+  // --- Configuración de Gramática ---
   const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
-  // let speechRecognitionList = SpeechGrammarList ? new SpeechGrammarList() : null;
-  // if(speechRecognitionList) {
-  //     const numbers = 'cero | uno | dos | tres | cuatro | cinco | seis | siete | ocho | nueve | diez | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10';
-  //     const grammar = `#JSGF V1.0; grammar numbers; public <number> = [menos] <num> ; <num> = ${numbers} ;`;
-  //     speechRecognitionList.addFromString(grammar, 1);
-  // }
-  let speechRecognitionList = null; // <= Forzar a NULL para evitar fallos en móviles
+  // Añadimos 'menos' a la gramática
+  const numbers = 'menos cero | menos uno | menos dos | menos tres | menos cuatro | menos cinco | menos seis | menos siete | menos ocho | menos nueve | menos diez | cero | uno | dos | tres | cuatro | cinco | seis | siete | ocho | nueve | diez | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10';
+  const grammar = `#JSGF V1.0; grammar numbers; public <number> = ${numbers} ;`;
+  const speechRecognitionList = SpeechGrammarList ? new SpeechGrammarList() : null;
+  if(speechRecognitionList) speechRecognitionList.addFromString(grammar, 1);
+  // ----------------------------------------------------
 
   let recog = SpeechRecognition ? new SpeechRecognition() : null;
-  // ... (el resto del código sigue igual, pero sin usar speechRecognitionList en el objeto recog) ...
-  // ... (el resto del código que ya estaba) ...
+  let isRecording = false; 
+  let currentResolve = null; 
 
   if(!recog){
-    // Este mensaje será crucial para avisar al usuario en Safari iOS
-    alert('Tu navegador no soporta o tiene deshabilitado el reconocimiento de voz (Web Speech API).');
+    alert('Tu navegador no soporta reconocimiento de voz.');
     return;
   }
 
-  // --- Aplicando mejoras ---
+  // --- Inicialización y configuración del reconocedor ---
   recog.lang = 'es'; 
   recog.interimResults = false;
-  recog.maxAlternatives = 1;
-  // La propiedad 'continuous' puede ser problemática. Si falla, prueba a ponerla a 'false'.
-  recog.continuous = true; 
-  // if(speechRecognitionList) recog.grammars = speechRecognitionList; // <= Eliminado
-  // -------------------------
+  recog.continuous = true; // Establecer modo continuo
+  if(speechRecognitionList) recog.grammars = speechRecognitionList;
 
-  // ... (resto del código sin cambios en onresult, onerror, onend, hablar, escuchar, detenerRonda) ...
-  
-  // Nueva función para normalizar números de texto a dígitos
-  function normalizarNumero(texto) {
-      const mapa = {
-          'cero': '0', 'uno': '1', 'dos': '2', 'tres': '3', 'cuatro': '4', 
-          'cinco': '5', 'seis': '6', 'siete': '7', 'ocho': '8', 'nueve': '9', 
-          'diez': '10'
-      };
-      // Manejar el caso de '-uno' o 'cinco'
-      let isNegative = texto.startsWith('-');
-      let numStr = isNegative ? texto.substring(1).trim() : texto.trim();
-      
-      if (mapa.hasOwnProperty(numStr)) {
-          numStr = mapa[numStr];
-      }
-      
-      return isNegative ? '-' + numStr : numStr;
-  }
-  
-  recog.onresult = e => {
-    if (currentResolve) {
-      const transcript = e.results[e.results.length - 1][0].transcript.trim().toLowerCase();
-      const resolveFn = currentResolve;
-      currentResolve = null; 
-      
-      let processedTranscript = transcript;
-      
-      // SIN LA GRAMÁTICA, debemos detectar "menos" en la transcripción
-      // También debemos aceptar "negativo" o solo el signo si se pronuncia
-      if (transcript.startsWith('menos')) {
-          processedTranscript = '-' + transcript.replace('menos', '').trim();
-      } else if (transcript.startsWith('negativo')) {
-          processedTranscript = '-' + transcript.replace('negativo', '').trim();
-      }
-      
-      // Intentamos normalizar números hablados (uno -> 1)
-      processedTranscript = normalizarNumero(processedTranscript);
-
-      resolveFn(processedTranscript); 
+  // Manejar el resultado de la escucha
+  recog.onresult = (event) => {
+    // Solo procesamos el último resultado (el más completo)
+    const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+    if(currentResolve) {
+      // Detener para forzar la finalización del 'escuchar' actual
+      recog.stop(); 
+      currentResolve(transcript);
     }
   };
 
-  // ... (el resto de las funciones: escuchar, hablar, iniciarRonda...)
+  // Manejar errores
+  recog.onerror = (event) => {
+    console.error('Speech recognition error:', event.error);
+    if (event.error === 'no-speech' || event.error === 'audio-capture') {
+        // Ignoramos estos errores si estamos en modo continuo, se reiniciará en onend
+        // Si hay un resolve pendiente, lo resolvemos vacío.
+        if(currentResolve) {
+            recog.stop(); // Forzar la parada para resolver la promesa
+            currentResolve('');
+        }
+    } else {
+        // Para errores graves, detenemos completamente
+        stopRecording();
+        hablar("Ha ocurrido un error grave en el reconocimiento de voz.");
+    }
+  };
+
+  // 🚨 SOLUCIÓN: Si la sesión termina (ej. el usuario deja de hablar, o llamamos a stop()), la reiniciamos.
+  recog.onend = () => {
+    // Solo reiniciamos si la variable 'isRecording' está activa (el usuario no ha pulsado Stop)
+    if (isRecording) { 
+        try {
+            recog.start(); 
+        } catch (e) {
+            console.warn("Recognition already started or error restarting.");
+        }
+    }
+  };
   
-  function escuchar(){
-    return new Promise(res => {
-      if(!isRecording) { res(''); return; } 
-      currentResolve = res;
+  /**
+   * Envuelve la escucha de voz en una Promesa, esperando un resultado antes de continuar.
+   * NO llama a recog.start(), sino que espera el resultado de la sesión continua.
+   */
+  function escuchar() {
+    return new Promise((resolve) => {
+      // Si no estamos grabando, resuelve inmediatamente
+      if (!isRecording) return resolve('');
+      
+      currentResolve = resolve;
+      
+      // La escucha ya está activa gracias a recog.onend / startRecording.
+      // Aquí solo esperamos a que recog.onresult llame a resolve.
+      // Opcional: para forzar que empiece a grabar tras la pregunta (a veces ayuda):
+      // recog.start(); 
+    });
+  }
+
+  /**
+   * Función para que el sintetizador hable un texto.
+   */
+  function hablar(texto) {
+    return new Promise((resolve) => {
+        if (!synth || !isRecording) { 
+            resolve();
+            return;
+        } 
+        
+        const utterance = new SpeechSynthesisUtterance(texto);
+        utterance.lang = 'es';
+        utterance.onend = resolve;
+        utterance.onerror = () => {
+            console.error("Speech synthesis error");
+            resolve();
+        };
+        synth.speak(utterance);
     });
   }
   
-  function detenerRonda() {
-    isRecording = false;
+  /**
+   * Inicia la grabación y pide el permiso UNA SOLA VEZ.
+   */
+  function startRecording() {
+    if (isRecording) return; // Ya está activo
+    
+    isRecording = true;
+    btnVoz.style.display = 'none';
+    btnDetenerVoz.style.display = 'inline-block';
+    
+    // Iniciar la sesión de reconocimiento y procesamiento
     try {
-        recog.stop(); 
-    } catch(e) { /* Ignorar si ya está detenida */ }
-    synth.cancel(); 
-    btnVoz.disabled = false;
-    btnVoz.textContent = '🎤 puntos x voz'; 
+        recog.start(); // Esto pedirá el permiso de micrófono
+        processVoiceInput(); // Iniciar el flujo de preguntas/respuestas
+    } catch (e) {
+        console.error("Error starting recognition:", e);
+        hablar("No se pudo iniciar la grabación de voz. Asegúrate de que el micrófono está disponible.");
+        stopRecording();
+    }
+  }
+
+  function stopRecording() {
+    if (!isRecording) return;
+    
+    isRecording = false;
+    btnVoz.style.display = 'inline-block';
     btnDetenerVoz.style.display = 'none';
+    
+    // Se detiene el motor, que a su vez previene el reinicio en recog.onend
+    recog.stop(); 
+  }
+
+  btnVoz.addEventListener('click', startRecording);
+  btnDetenerVoz.addEventListener('click', stopRecording);
+  
+  /**
+   * Mapea la transcripción de voz (texto) a un número entero.
+   */
+  function parsearRespuesta(texto) {
+      if (!texto) return NaN;
+
+      const numMap = {
+          'cero': 0, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4, 'cinco': 5, 
+          'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10
+      };
+
+      let esNegativo = false;
+      if (texto.startsWith('menos')) {
+          esNegativo = true;
+          texto = texto.replace('menos', '').trim();
+      }
+
+      let num = NaN;
+      if (!isNaN(parseInt(texto))) {
+          num = parseInt(texto);
+      } else if (numMap.hasOwnProperty(texto)) {
+          num = numMap[texto];
+      }
+
+      if (isNaN(num)) return NaN;
+      return esNegativo ? -num : num;
   }
   
-  window.detenerRonda = detenerRonda;
-  
-  async function iniciarRonda(){
-      // ... (código de iniciarRonda) ...
-      isRecording = true;
-      btnVoz.disabled = true;
-      btnVoz.textContent = '⏳ Escuchando...';
-      btnDetenerVoz.style.display = 'inline-block';
+  /**
+   * Proceso principal de entrada de voz.
+   */
+  async function processVoiceInput() {
+    const filas = document.querySelectorAll('#cuerpo-tabla-ascendente tr');
 
-      const tabla = document.getElementById('tabla-puntos');
-      const cuerpo = document.getElementById('cuerpo-tabla');
-      const filas = Array.from(cuerpo.rows); 
+    let colActual = 0; 
+    let allRoundsFilled = true;
 
-      if (filas.length === 0) {
-          await hablar('Añade jugadores para empezar');
-          detenerRonda();
-          return;
-      }
-      
-      // ** IMPORTANTE: En móviles puede que necesites REINICIAR aquí**
-      // En lugar de llamar a `recog.start()` una vez, a veces hay que llamarlo
-      // para cada jugador si `continuous: true` falla.
-      
-      try {
-          recog.start(); 
-      } catch (e) {
-          console.warn("Recognition start failed, trying to continue:", e);
-      }
-
-      // Lógica para encontrar la columna actual
-      const nCols = tabla.tHead.rows[1].cells.length; 
-      let colActual = -1;
-      for(let c=1;c<=nCols;c++){
-        if(filas.some(f => f.cells[c].textContent==='')){ colActual = c; break; }
-      }
-
-      if(colActual === -1){
-        await hablar('Todas las rondas están completas');
-        detenerRonda();
-        return;
-      }
-
-      const colNombre = tabla.tHead.rows[1].cells[colActual - 1].textContent;
-      await hablar(`Ronda de ${colNombre} cartas`); 
-
-      // Bucle principal
-      for(let f of filas){
-        if(!isRecording) break; 
-        
-        const nombre = f.cells[0].textContent;
-        await hablar(`Puntos para ${nombre}`);
-        
-        if(!isRecording) break; 
-
-        let resp = '';
-        let intentos = 0;
-        
-        while((!resp || isNaN(parseInt(resp))) && intentos < 3 && isRecording){ 
-            if (intentos > 0) {
-                await hablar(`No he entendido. Por favor, di solo el número de bazas para ${nombre}.`);
-            }
-            resp = await escuchar(); 
-            intentos++;
+    // Buscar la primera celda que NO tenga valor para determinar la ronda actual
+    for (let i = 0; i < window.rondasActuales.todas.length; i++) {
+        const celda = document.querySelector(`.ronda-${i}`);
+        if (celda && celda.textContent.trim() === '') {
+            colActual = i;
+            allRoundsFilled = false;
+            break; 
         }
-
-        let num = parseInt(resp);
-
-        if(!isNaN(num)){
-          f.cells[colActual].textContent = num.toString(); 
-        } else if (isRecording) { 
-          await hablar(`No he entendido el número después de varios intentos. Poniendo cero para ${nombre}.`);
-          f.cells[colActual].textContent = '0'; 
-        }
-      }
-      
-      if(typeof calcularPuntuaciones === 'function') calcularPuntuaciones();
-      if(typeof actualizarRanking === 'function') actualizarRanking();
-      
-      detenerRonda();
     }
-  
-  if (btnVoz) btnVoz.addEventListener('click', iniciarRonda);
-  if (btnDetenerVoz) btnDetenerVoz.addEventListener('click', detenerRonda);
+    
+    if (allRoundsFilled) {
+        await hablar("El juego ha terminado. Todas las rondas están completas.");
+        stopRecording();
+        return;
+    }
+    
+    if (filas.length === 0) {
+        await hablar("No hay jugadores.");
+        stopRecording();
+        return;
+    }
 
-  window.iniciarRondaVoz = iniciarRonda;
+    // Identificar la ronda actual
+    const numCartas = window.rondasActuales.todas[colActual];
+    await hablar(`Comenzando ronda ${colActual + 1} de ${numCartas} cartas`); 
+
+    // Bucle principal: pide el valor a cada jugador
+    for(const f of filas){ // Usamos 'const' en vez de 'let' ya que no se reasigna
+      if(!isRecording) break; 
+      
+      const nombre = f.cells[0].textContent;
+      await hablar(`Puntos para ${nombre}`);
+      
+      if(!isRecording) break; 
+
+      let resp = '';
+      let intentos = 0;
+      let num = NaN;
+      
+      // Bucle de reintento (máx. 3 veces)
+      while(isNaN(num) && intentos < 3 && isRecording){ 
+          if (intentos > 0) {
+              await hablar(`No he entendido. Por favor, di solo el número de bazas para ${nombre}.`);
+          }
+          // Llama a la versión mejorada de escuchar que no reinicia el micrófono
+          resp = await escuchar(); 
+          num = parsearRespuesta(resp);
+          intentos++;
+      }
+
+      // --- Escribir el resultado en la celda correcta ---
+      const celdaAfectada = document.querySelector(`tr[data-jugador="${nombre}"] .ronda-${colActual}`);
+
+      if(celdaAfectada){
+        if(!isNaN(num)){
+          celdaAfectada.textContent = num;
+        } else if (isRecording) { 
+          // Si falló 3 veces, usamos 0 como valor de seguridad.
+          await hablar(`No he entendido el número después de ${intentos} intentos. Poniendo cero para ${nombre}.`);
+          celdaAfectada.textContent = '0'; 
+        }
+      }
+    }
+    
+    // Al terminar de pasar por todos los jugadores, se actualizan las puntuaciones y el ranking.
+    if(window.calcularPuntuaciones) window.calcularPuntuaciones();
+    if(window.actualizarRanking) window.actualizarRanking();
+
+    // Mensaje de finalización
+    if(isRecording){
+        await hablar("Ronda completada. Dime puntos para la siguiente ronda cuando quieras.");
+        // Después de completar la ronda, volvemos a llamar a processVoiceInput
+        // para buscar la siguiente ronda vacía o detener si está completa.
+        processVoiceInput();
+    }
+  }
 });
