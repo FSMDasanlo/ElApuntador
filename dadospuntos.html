@@ -19,10 +19,31 @@
     .btn-help { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; background-color: #4a90e2; color: white; font-weight: bold; font-size: 1.2rem; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); transition: transform 0.2s, background-color 0.2s; margin-left: 10px; }
     .btn-help:hover { background-color: #357ab8; transform: scale(1.1); }
     .btn-help svg { width: 20px; height: 20px; }
-    header { display: flex; flex-direction: column; align-items: flex-start; }
-    .acciones { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    
+    /* 💡 MEJORA MOBILE: El header ahora es un contenedor flexible para alinear */
+    header { 
+        display: flex; 
+        flex-direction: column; 
+        align-items: flex-start; 
+        /* Para asegurar que el título y los botones estén bien espaciados */
+    }
 
-    /* Botón de voz */
+    /* 💡 MEJORA MOBILE: Optimización del contenedor de botones */
+    .acciones { 
+        margin-top: 1rem; 
+        display: flex; 
+        /* Los botones pueden ir a varias líneas si es necesario, pero intentarán mantenerse juntos */
+        flex-wrap: wrap; 
+        /* Reducimos el espacio entre botones para pantallas pequeñas */
+        gap: 0.5rem; 
+        align-items: center; 
+        /* Asegura que ocupe todo el ancho para la alineación si es necesario */
+        width: 100%;
+        /* Alinea los botones al inicio (izquierda) */
+        justify-content: flex-start;
+    }
+
+    /* Botón de voz (sin cambios funcionales) */
     #btn-voz {
       display: inline-block;
       padding: 0.5rem 1rem;
@@ -53,13 +74,19 @@
         border: 1px solid #ccc; 
         padding: 0.3rem; 
         text-align: center; 
-        color: #fff; /* Texto blanco por defecto para celdas de la cabecera */
+        color: #fff; 
     }
     
-    /* NUEVO: ESTILO PARA LOS TÍTULOS (Ronda Libre/Obligada) - Mismo color que Jugador/Total */
+    /* CORRECCIÓN CLAVE DEFINITIVA: Color de texto para el cuerpo */
+    #cuerpo-tabla-ascendente td,
+    #cuerpo-tabla-descendente td {
+        color: #333 !important; 
+    }
+    
+    /* NUEVO: ESTILO PARA LOS TÍTULOS (Ronda Libre/Obligada) */
     #contenedor-ascendente h3,
     #contenedor-descendente h3 {
-        background-color: #4a70a8; /* Azul Oscuro */
+        background-color: #4a70a8; 
         color: white;
         padding: 0.5rem; 
         margin-top: 0; 
@@ -68,27 +95,21 @@
     }
 
     /* CABECERAS (thead) - Tonalidades azules */
-    
-    /* 1. Fila de Jugador/Total (rowspan=2) - TONO MÁS OSCURO */
     #tabla-puntos-ascendente thead th[rowspan="2"],
     #tabla-puntos-descendente thead th[rowspan="2"] {
-        background-color: #4a70a8; /* Azul Oscuro */
+        background-color: #4a70a8; 
         font-weight: bold;
         color: white;
     }
-
-    /* 2. Fila de Números (1, 2, 3...) - TONO INTERMEDIO */
     #tabla-puntos-ascendente thead tr:nth-child(1) th:not([rowspan]),
     #tabla-puntos-descendente thead tr:nth-child(1) th:not([rowspan]) {
-        background-color: #6b93c9; /* Azul Medio */
+        background-color: #6b93c9; 
         font-weight: bold;
         color: white;
     }
-
-    /* 3. Fila de Categorías (N, R, J...) - TONO MÁS CLARO */
     #tabla-puntos-ascendente thead tr:nth-child(2) th,
     #tabla-puntos-descendente thead tr:nth-child(2) th {
-        background-color: #8caadb; /* Azul Medio Claro */
+        background-color: #8caadb; 
         font-weight: bold;
         color: white;
     }
@@ -100,21 +121,26 @@
         display: flex;
         flex-direction: column !important; 
         gap: 20px; 
-    }
+	}
     
     /* Asegurar que las tablas ocupan el 100% del contenedor vertical */
     .tabla-ronda {
         width: 100% !important; 
     }
     
-    /* Anchura ajustada y alineación de nombres de jugadores a la derecha */
+    /* 💡 MEJORA MOBILE: Control de la columna del jugador */
     #tabla-puntos-ascendente td.jugador, 
     #tabla-puntos-descendente td.jugador {
         text-align: right !important; 
-        width: 10%; 
-        white-space: nowrap; 
-        background-color: #f7f7f7; /* Fondo gris claro para los nombres */
-        color: #333; /* Color de texto oscuro para los nombres */
+        width: 10%; /* Mantener el ancho estrecho */
+        white-space: nowrap; /* Evita que el nombre se divida en varias líneas */
+        
+        /* SOLUCIÓN AL DESBORDAMIENTO: Corta el texto y añade puntos suspensivos */
+        overflow: hidden; 
+        text-overflow: ellipsis; 
+        
+        background-color: #f7f7f7; 
+        color: #333; 
         font-weight: bold;
     }
     
@@ -131,7 +157,7 @@
     #tabla-puntos-descendente .total {
         font-weight: bold;
         background-color: #f0f0f0; 
-        color: #333; /* Texto oscuro en el total del cuerpo */
+        color: blue; 
     }
   </style>
 </head>
@@ -186,7 +212,6 @@
       <span class="cerrar">&times;</span>
       <h2>Instrucciones: Carrera de Dados</h2>
       <p>Este juego de dados se compone de 12 tiradas (o categorías) por jugador, divididas en una Ronda Libre y una Ronda Obligada.</p>
-      <p>La puntuación en cada tirada se calcula multiplicando la cantidad de caras obtenidas por el valor base de la cara:</p>
       <ul>
         <li><strong>N</strong> (Negros, 1): 1 punto base</li>
         <li><strong>R</strong> (Rojos, 2): 2 puntos base</li>
