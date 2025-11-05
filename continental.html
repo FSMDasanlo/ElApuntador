@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>El Apuntador - Continental</title>
-  <link rel="stylesheet" href="style.css">
+ 
+  <link rel="stylesheet" href="continental.css"> 
   <script src="continental.js" defer></script>
   <script defer>
     document.addEventListener("DOMContentLoaded", () => {
@@ -14,49 +15,19 @@
       });
     });
   </script>
-
-  <style>
-    /* ===== Botón de ayuda con ícono azul ===== */
-    #btn-ayuda {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      background-color: #4a90e2;  /* azul */
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      transition: transform 0.2s, background-color 0.2s;
-      margin-left: 10px;
-    }
-
-    #btn-ayuda:hover {
-      background-color: #357ab8;
-      transform: scale(1.1);
-    }
-
-    #btn-ayuda svg {
-      width: 20px;
-      height: 20px;
-    }
-  </style>
 </head>
 <body class="juego">
- 
- <header class="header-juego">
+<div class="header-juego">
   <h1 id="nombre-juego">
     CONTINENTAL
     <button id="btn-ayuda" title="Ver reglamento">
-      <!-- Ícono SVG de información -->
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
         <circle cx="12" cy="12" r="10" fill="none"/>
         <text x="12" y="16" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold">i</text>
       </svg>
     </button>
   </h1>
-</header>
+</div>
 
 <div class="botones-superiores">
   <button onclick="location.href='juegos.html'">Volver a juegos</button>
@@ -66,8 +37,10 @@
 
 <hr class="separador">
 
-<div id="contenedor-tabla">
-  <!-- aquí ya tienes tu tabla -->
+<div class="contenedor-principal"> 
+  
+  <div id="ranking-vivo" class="ranking"></div>
+  
   <main class="marcador">
     <div class="tabla">
       <table id="tabla-puntos">
@@ -79,21 +52,15 @@
             <th>2 Esc.</th>
             <th>3 Tríos</th>
             <th>2 Tríos 1 Esc.</th>
-            <th>2 Esc. 1 Trío</th>
             <th>4 Tríos</th>
             <th>Total</th>
           </tr>
         </thead>
         <tbody>
-          <!-- filas generadas dinámicamente -->
-        </tbody>
+          </tbody>
       </table>
-
-      <!-- Ranking en vivo -->
-      <div id="ranking-vivo" class="ranking"></div>
     </div>
   </main>
 </div>
-
 </body>
 </html>
