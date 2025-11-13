@@ -41,6 +41,20 @@
       transform: scale(1.05);
     }
 
+    /* Estilo para los botones de acción principales */
+    .btn-accion {
+      background-color: #4a90e2; /* Azul */
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .btn-accion:hover { background-color: #357ab8; }
+
+
     /* Reglas principales para alineación de tablas */
     table { 
         border-collapse: collapse; 
@@ -155,9 +169,9 @@
       </button>
     </h1>
 <div class="acciones">
-  <button onclick="window.location.href='juegos.html'">← A juegos</button>
-    <button onclick="window.location.href='gestion_jugadores.html'">👥 Jugadores</button>
-	<button onclick="limpiarPuntuaciones()">🧹 Borrar</button>
+  <button class="btn-accion" onclick="window.location.href='juegos.html'">← A juegos</button>
+    <button class="btn-accion" onclick="window.location.href='gestion_jugadores.html'">👥 Jugadores</button>
+	<button class="btn-accion" onclick="limpiarPuntuaciones()">🧹 Borrar</button>
   <button id="btn-voz">🎤 puntos x voz</button>
   <button id="btn-detener-voz" style="display:none; background-color: #e74c3c; color: white; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-weight: bold; cursor: pointer;">🛑 Detener voz</button> 
 </div>

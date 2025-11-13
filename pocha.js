@@ -463,8 +463,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // --- ¡NUEVO! Lógica para el redoble de tambores ---
       if (window.hablarTexto) {
-        // URL de un sonido de redoble gratuito.
-        const urlRedoble = 'https://cdn.pixabay.com/audio/2022/03/15/audio_51c72a71a3.mp3';
+        // Usamos el archivo de sonido local para el redoble.
+        const urlRedoble = 'tambor_corto.mp3';
         const sonido = new Audio(urlRedoble);
 
         // Cuando el sonido del redoble TERMINE, entonces hablamos.
