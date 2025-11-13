@@ -1122,3 +1122,10 @@ body.juego header .acciones {
 .fila-b td {
   background-color: #fff9c4 !important;
 }
+
+/* ¡NUEVO! Contenedor para agrupar el botón de voz y su ayuda */
+.grupo-voz {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

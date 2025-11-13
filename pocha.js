@@ -17,6 +17,12 @@ document.addEventListener("DOMContentLoaded", () => {
   marcador.prepend(rankingContainer);
 
   let jugadores = JSON.parse(localStorage.getItem("jugadores")) || [];
+  
+  // ¡NUEVO! Historial para la función de deshacer
+  let historialPuntuaciones = [];
+
+  // ¡NUEVO! Guardián para controlar el fin de partida
+  let partidaTerminada = false;
 
   function generarRondas() {
     const nJugadores = jugadores.length;
@@ -186,6 +192,9 @@ document.addEventListener("DOMContentLoaded", () => {
       guardarPuntuaciones();
       calcularPuntuaciones();
       actualizarRanking();
+
+      // ¡NUEVO! Comprobar si la partida ha terminado.
+      verificarFinDePartidaYLeerRanking();
     }
   }
 
@@ -196,6 +205,9 @@ document.addEventListener("DOMContentLoaded", () => {
     guardarPuntuaciones();
     calcularPuntuaciones();
     actualizarRanking();
+
+    // ¡NUEVO! Comprobar si la partida ha terminado.
+    verificarFinDePartidaYLeerRanking();
   }
 
   function inicializarTablas() {
@@ -346,6 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
       for (let i = 1; i < row.cells.length - 1; i++) row.cells[i].textContent = "";
       row.querySelector(".total").textContent = 0; 
     });
+    partidaTerminada = false; // ¡NUEVO! Reiniciamos el guardián
     
     guardarPuntuaciones();
     actualizarRanking();
@@ -356,6 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (nombre && !jugadores.includes(nombre)) {
       jugadores.push(nombre);
       localStorage.setItem("jugadores", JSON.stringify(jugadores));
+      partidaTerminada = false; // ¡NUEVO! Reiniciamos el guardián
       inicializarTablas(); // Recargar la vista
     }
   }
@@ -367,4 +381,122 @@ document.addEventListener("DOMContentLoaded", () => {
   window.rondasActuales = rondasActuales;
   window.calcularPuntuaciones = calcularPuntuaciones;
   window.actualizarRanking = actualizarRanking;
+
+  /**
+   * NUEVA FUNCIÓN: Actualiza la puntuación desde la entrada de voz de la IA.
+   * Busca la primera celda vacía para un jugador y le asigna los puntos.
+   * @param {string} nombreJugador El nombre del jugador reconocido.
+   * @param {number} puntos Los puntos reconocidos.
+   */
+  window.actualizarPuntosPorVoz = function(nombreJugador, puntos) {
+    // --- LÓGICA MEJORADA ---
+    // 1. Encontrar la primera columna (ronda) que tenga al menos una celda vacía.
+    let colActual = -1;
+    const totalRondas = rondasActuales.todas.length;
+
+    for (let i = 0; i < totalRondas; i++) {
+      // Buscamos si existe al menos una celda vacía en la columna 'i'
+      const algunaCeldaVaciaEnColumna = document.querySelector(`.ronda-${i}:empty`);
+      if (algunaCeldaVaciaEnColumna) {
+        colActual = i;
+        break; // Encontramos la primera ronda incompleta
+      }
+    }
+
+    if (colActual === -1) {
+      console.warn("El juego ha terminado. No hay rondas vacías.");
+      return;
+    }
+
+    // 2. Buscar la celda específica para el jugador en esa columna.
+    const celdaParaActualizar = document.querySelector(
+      `tr[data-jugador="${nombreJugador}"] .ronda-${colActual}`
+    );
+
+    if (celdaParaActualizar && celdaParaActualizar.textContent === '') {
+      console.log(`Actualizando celda para ${nombreJugador} con ${puntos} puntos.`);
+      celdaParaActualizar.textContent = puntos;
+
+      // ¡NUEVO! Guardamos la acción en el historial
+      historialPuntuaciones.push(celdaParaActualizar);
+
+      // Disparamos los cálculos y guardado como si fuera una entrada manual.
+      guardarPuntuaciones();
+      calcularPuntuaciones();
+      actualizarRanking();
+
+      // ¡NUEVO! Comprobar si la partida ha terminado para leer el ranking.
+      verificarFinDePartidaYLeerRanking();
+
+    } else {
+      console.warn(`La celda para ${nombreJugador} en la ronda actual ya está llena o no se encontró.`);
+      // Opcional: podrías usar `alert` o una notificación para el usuario.
+      // alert(`No hay más rondas para ${nombreJugador}.`);
+    }
+  }
+
+  /**
+   * ¡NUEVA FUNCIÓN! Comprueba si quedan celdas vacías y, si no, lee el ranking.
+   */
+  function verificarFinDePartidaYLeerRanking() {
+    // Si el guardián dice que ya hemos anunciado el final, no hacemos nada.
+    if (partidaTerminada) return;
+
+    // Buscamos si queda alguna celda de puntuación vacía
+    const algunaCeldaVacia = document.querySelector('td[contenteditable="true"]:empty');
+
+    // Si no hay celdas vacías, la partida ha terminado
+    if (!algunaCeldaVacia) {
+      console.log("¡Partida finalizada! Leyendo ranking...");
+      partidaTerminada = true; // Activamos el guardián para no repetir
+
+      // Construimos el texto a leer a partir de la lista del ranking
+      const rankingItems = document.querySelectorAll("#ranking-list li");
+      let textoRanking = "Partida finalizada. El ranking es: ";
+      const posiciones = ["En primer lugar", "En segundo lugar", "En tercer lugar"];
+
+      rankingItems.forEach((item, index) => {
+        const textoItem = item.textContent.replace(/^[0-9]+\.\s/, '').replace('→', 'con');
+        const prefijo = posiciones[index] || `En posición ${index + 1},`;
+        textoRanking += `${prefijo}, ${textoItem} puntos. `;
+      });
+
+      // --- ¡NUEVO! Lógica para el redoble de tambores ---
+      if (window.hablarTexto) {
+        // URL de un sonido de redoble gratuito.
+        const urlRedoble = 'https://cdn.pixabay.com/audio/2022/03/15/audio_51c72a71a3.mp3';
+        const sonido = new Audio(urlRedoble);
+
+        // Cuando el sonido del redoble TERMINE, entonces hablamos.
+        sonido.onended = () => {
+          window.hablarTexto(textoRanking);
+        };
+
+        // Reproducimos el sonido.
+        sonido.play().catch(e => {
+          console.error("No se pudo reproducir el sonido:", e);
+          window.hablarTexto(textoRanking); // Si falla el sonido, al menos hablamos.
+        });
+      }
+    }
+  }
+
+  /**
+   * ¡NUEVA FUNCIÓN! Deshace la última puntuación introducida.
+   */
+  window.deshacerUltimaPuntuacion = function() {
+    if (historialPuntuaciones.length === 0) {
+      console.warn("No hay acciones que deshacer.");
+      return;
+    }
+
+    const ultimaCeldaModificada = historialPuntuaciones.pop();
+    console.log("Deshaciendo la última entrada en la celda:", ultimaCeldaModificada);
+    ultimaCeldaModificada.textContent = ''; // Borramos el contenido
+
+    // Recalculamos todo
+    guardarPuntuaciones();
+    calcularPuntuaciones();
+    actualizarRanking();
+  }
 });
