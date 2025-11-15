@@ -7,6 +7,8 @@
  
   <link rel="stylesheet" href="continental.css"> 
   <script src="continental.js" defer></script>
+  <script src="voz-navegador.js" defer></script>
+
   <script defer>
     document.addEventListener("DOMContentLoaded", () => {
       const btnAyuda = document.getElementById("btn-ayuda");
@@ -33,13 +35,18 @@
   <button onclick="location.href='juegos.html'">Volver a juegos</button>
   <button onclick="location.href='gestion_jugadores.html'">Gestión de nombres</button>
   <button onclick="limpiarPuntuaciones()">Limpiar puntuación</button>
+  <div class="grupo-voz">
+    <button id="btn-voz">🎤 Iniciar voz</button>
+    <button id="btn-voz-ayuda" title="Ver comandos de voz" class="btn-help" style="background-color: #f1c40f;">
+      i
+    </button>
+  </div>
+  <button id="btn-detener-voz" style="display:none; background-color: #e74c3c;">🛑 Detener voz</button>
 </div>
 
 <hr class="separador">
 
 <div class="contenedor-principal"> 
-  
-  <div id="ranking-vivo" class="ranking"></div>
   
   <main class="marcador">
     <div class="tabla">
@@ -62,5 +69,41 @@
     </div>
   </main>
 </div>
+
+<!-- Modal para la ayuda de voz -->
+<div id="modal-voz-ayuda" class="modal">
+  <div class="modal-contenido">
+    <span class="cerrar-voz">&times;</span>
+    <h2>Comandos de Voz</h2>
+    <p>Pulsa el botón <strong>"🎤 Iniciar voz"</strong> para iniciar la escucha. La aplicación rellenará la tabla a medida que dictes las puntuaciones.</p>
+    
+    <h4>Añadir Puntuación:</h4>
+    <p>Di el nombre del jugador seguido de los puntos. Ejemplos:</p>
+    <ul>
+      <li><em>"Jesús veinte"</em></li>
+      <li><em>"Ana cero"</em></li>
+    </ul>
+
+    <h4>Comandos Generales:</h4>
+    <ul>
+      <li><strong>"Reiniciar"</strong> o <strong>"Borrar todo"</strong>: Limpia todas las puntuaciones de la tabla.</li>
+      <li><strong>"Apaga micro"</strong>: Detiene la escucha de voz (equivale a pulsar el botón "🛑 Detener voz").</li>
+      <li><strong>"Deshacer"</strong> o <strong>"Corrige"</strong>: Borra la última puntuación introducida.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  // Lógica para el modal de ayuda de voz
+  const modalVoz = document.getElementById("modal-voz-ayuda");
+  const btnVozAyuda = document.getElementById("btn-voz-ayuda");
+  const cerrarVoz = document.querySelector(".cerrar-voz");
+
+  if (btnVozAyuda) {
+    btnVozAyuda.addEventListener("click", () => { modalVoz.style.display = "block"; });
+    cerrarVoz.addEventListener("click", () => { modalVoz.style.display = "none"; });
+    window.addEventListener("click", (e) => { if (e.target === modalVoz) { modalVoz.style.display = "none"; } });
+  }
+</script>
 </body>
 </html>

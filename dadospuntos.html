@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Carrera de Dados</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style_dadospuntos.css">
   <script src="dadospuntos.js" defer></script>
-  <script src="vozdados.js" defer></script>
+  <script src="voz-navegador.js" defer></script>
 
   <style>
     /* ===== Modal de ayuda (Sin cambios) ===== */
@@ -23,182 +23,48 @@
     .acciones { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
 
     /* Botón de voz */
-    #btn-voz {
-      display: inline-block;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      font-weight: bold;
-      background-color: #4a90e2;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      transition: transform 0.2s, background-color 0.2s;
-    }
-    #btn-voz:hover {
-      background-color: #357ab8;
-      transform: scale(1.05);
-    }
-
-    /* Estilo para los botones de acción principales */
-    .btn-accion {
-      background-color: #4a90e2; /* Azul */
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 0.5rem 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .btn-accion:hover { background-color: #357ab8; }
-
-
-    /* Reglas principales para alineación de tablas */
-    table { 
-        border-collapse: collapse; 
-        width: 100%; 
-        margin-top: 0; 
-        font-size: 0.9rem; 
-        table-layout: fixed; /* IMPORTANTE: Fija el ancho de las columnas */
-    } 
-    th, td { 
-        border: 1px solid #ccc; 
-        padding: 0.3rem; 
-        text-align: center; 
-        color: #fff; /* Esto establece el color blanco para TODOS (th y td). */
-    }
-    
-    /* 💡 CORRECCIÓN CLAVE DEFINITIVA: Sobrescribimos el color de texto blanco para las celdas del cuerpo forzando la prioridad */
-    /* Este selector es muy específico y usa !important para anular cualquier otra regla. */
-    #cuerpo-tabla-ascendente td,
-    #cuerpo-tabla-descendente td {
-        color: #333 !important; /* Color oscuro forzado para el texto en las celdas de puntuación */
-    }
-    
-    /* NUEVO: ESTILO PARA LOS TÍTULOS (Ronda Libre/Obligada) - Mismo color que Jugador/Total */
-    #contenedor-ascendente h3,
-    #contenedor-descendente h3 {
-        background-color: #4a70a8; /* Azul Oscuro */
-        color: white;
-        padding: 0.5rem; 
-        margin-top: 0; 
-        border-radius: 8px 8px 0 0; 
-        text-align: center;
-    }
-
-    /* CABECERAS (thead) - Tonalidades azules */
-    
-    /* 1. Fila de Jugador/Total (rowspan=2) - TONO MÁS OSCURO */
-    #tabla-puntos-ascendente thead th[rowspan="2"],
-    #tabla-puntos-descendente thead th[rowspan="2"] {
-        background-color: #4a70a8; /* Azul Oscuro */
-        font-weight: bold;
-        color: white;
-    }
-
-    /* 2. Fila de Números (1, 2, 3...) - TONO INTERMEDIO */
-    #tabla-puntos-ascendente thead tr:nth-child(1) th:not([rowspan]),
-    #tabla-puntos-descendente thead tr:nth-child(1) th:not([rowspan]) {
-        background-color: #6b93c9; /* Azul Medio */
-        font-weight: bold;
-        color: white;
-    }
-
-    /* 3. Fila de Categorías (N, R, J...) - TONO MÁS CLARO */
-    #tabla-puntos-ascendente thead tr:nth-child(2) th,
-    #tabla-puntos-descendente thead tr:nth-child(2) th {
-        background-color: #8caadb; /* Azul Medio Claro */
-        font-weight: bold;
-        color: white;
-    }
-    
-    /* CUERPO DE LA TABLA (tbody) */
-    
-    /* Forzar la visualización vertical de las tablas en cualquier tamaño de pantalla */
-    #tablas-rondas {
-        display: flex;
-        flex-direction: column !important; 
-        gap: 20px; 
-	}
-    
-    /* Asegurar que las tablas ocupan el 100% del contenedor vertical */
-    .tabla-ronda {
-        width: 100% !important; 
-    }
-    
-    /* Anchura ajustada y alineación de nombres de jugadores a la derecha */
-    #tabla-puntos-ascendente td.jugador, 
-    #tabla-puntos-descendente td.jugador {
-        text-align: right !important; 
-        width: 10%; 
-        white-space: nowrap; 
-        background-color: #f7f7f7; /* Fondo gris claro para los nombres */
-        color: #333; /* Color de texto oscuro para los nombres */
-        font-weight: bold;
-    }
-    
-    /* ANCHOS DE COLUMNAS IGUALES: Se aplica a las celdas de categorías (6 columnas) */
-    #tabla-puntos-ascendente thead tr th:not([rowspan]), 
-    #tabla-puntos-descendente thead tr th:not([rowspan]),
-    #cuerpo-tabla-ascendente td:not(.jugador):not(.total),
-    #cuerpo-tabla-descendente td:not(.jugador):not(.total) {
-        width: 13%; 
-    }
-
-    /* Sombreado de la columna Total en ambas tablas (incluyendo el cuerpo) */
-    #tabla-puntos-ascendente .total, 
-    #tabla-puntos-descendente .total {
-        font-weight: bold;
-        background-color: #f0f0f0; 
-        color: blue; /* Mantener el color azul para el total */
-    }
   </style>
 </head>
 
 <body class="juego">
-  <header>
-    <h1 id="nombre-juego">
-      CARRERA DE DADOS
-      <button id="btn-ayuda" title="Ver instrucciones" class="btn-help">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-          <circle cx="12" cy="12" r="10" fill="none" />
-          <text x="12" y="16" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold">i</text>
-        </svg>
-      </button>
-    </h1>
-<div class="acciones">
-  <button class="btn-accion" onclick="window.location.href='juegos.html'">← A juegos</button>
-    <button class="btn-accion" onclick="window.location.href='gestion_jugadores.html'">👥 Jugadores</button>
-	<button class="btn-accion" onclick="limpiarPuntuaciones()">🧹 Borrar</button>
-  <button id="btn-voz">🎤 puntos x voz</button>
-  <button id="btn-detener-voz" style="display:none; background-color: #e74c3c; color: white; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-weight: bold; cursor: pointer;">🛑 Detener voz</button> 
-</div>
-
+<div class="contenedor-juego">
+  <header class="header-juego">
+    <div class="titulo">
+      <h1 id="nombre-juego">
+        CARRERA DE DADOS
+        <button id="btn-ayuda" title="Ver instrucciones" class="btn-help">
+          <!-- Ícono SVG de información -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+            <circle cx="12" cy="12" r="10" fill="none"/>
+            <text x="12" y="16" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold">i</text>
+          </svg>
+        </button>
+      </h1>
+      <p id="mensaje-juego">Puntos:<input type="number" id="meta-puntos" value="100" min="10" style="width:80px; text-align:center;"></p>
+    </div>
+    <div class="acciones">
+        <button class="btn-accion" onclick="window.location.href='juegos.html'">← A juegos</button>
+        <button class="btn-accion" onclick="window.location.href='gestion_jugadores.html'">👥 Nombres</button>
+        <button class="btn-accion" onclick="limpiarPuntuaciones()">🧹 Borrar</button>
+        <div class="grupo-voz">
+          <button id="btn-voz">🎤 Puntos x voz</button>
+          <button id="btn-voz-ayuda" title="Ver comandos de voz" class="btn-help" style="background-color: #f1c40f;">
+            i
+          </button>
+        </div>
+      </div>
+      <button id="btn-detener-voz" style="display:none; background-color: #e74c3c; color: white; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-weight: bold; cursor: pointer; margin-top: 10px;">🛑 Detener voz</button>
   </header>
 
   <main class="marcador">
-    <div id="tablas-rondas-wrapper">
-      <div id="tablas-rondas">
-          
-          <div class="tabla-ronda" id="contenedor-ascendente">
-               <h3>Ronda Libre</h3>
-               <table id="tabla-puntos-ascendente">
-                  <thead></thead>
-                  <tbody id="cuerpo-tabla-ascendente"></tbody>
-               </table>
-          </div>
-
-          <div class="tabla-ronda" id="contenedor-descendente">
-               <h3>Ronda Obligada</h3>
-               <table id="tabla-puntos-descendente">
-                  <thead></thead>
-                  <tbody id="cuerpo-tabla-descendente"></tbody>
-               </table>
-          </div>
-          
-      </div>
+    <div class="tabla">
+      <table id="tabla-puntos">
+        <thead>
+          <tr id="fila-totales"></tr>
+          <tr id="fila-nombres"></tr>
+        </thead>
+        <tbody id="cuerpo-tabla"></tbody>
+      </table>
     </div>
   </main>
 
@@ -223,6 +89,29 @@
     </div>
   </div>
 
+  <!-- Modal para la ayuda de voz -->
+  <div id="modal-voz-ayuda" class="modal">
+    <div class="modal-contenido">
+      <span class="cerrar-voz">&times;</span>
+      <h2>Comandos de Voz</h2>
+      <p>Pulsa el botón <strong>"🎤 Puntos x voz"</strong> para iniciar la escucha. La aplicación rellenará la tabla a medida que dictes las puntuaciones.</p>
+      
+      <h4>Añadir Puntuación:</h4>
+      <p>Di el nombre del jugador seguido de los puntos. La app buscará la primera fila vacía para ese jugador. Ejemplos:</p>
+      <ul>
+        <li><em>"Jesús veinte"</em></li>
+        <li><em>"Ana cero"</em></li>
+      </ul>
+
+      <h4>Comandos Generales:</h4>
+      <ul>
+        <li><strong>"Deshacer"</strong> o <strong>"Corrige"</strong>: Borra la última puntuación introducida.</li>
+        <li><strong>"Reiniciar"</strong> o <strong>"Borrar todo"</strong>: Limpia todas las puntuaciones de la tabla.</li>
+        <li><strong>"Apaga micro"</strong>: Detiene la escucha de voz.</li>
+      </ul>
+    </div>
+  </div>
+
   <script>
     const modal = document.getElementById("modal-ayuda");
     const btnAyuda = document.getElementById("btn-ayuda");
@@ -231,6 +120,14 @@
     btnAyuda.addEventListener("click", () => { modal.style.display = "block"; });
     cerrar.addEventListener("click", () => { modal.style.display = "none"; });
     window.addEventListener("click", (e) => { if(e.target===modal){ modal.style.display="none"; } });
+
+    // Lógica para el modal de ayuda de voz
+    const modalVoz = document.getElementById("modal-voz-ayuda");
+    const btnVozAyuda = document.getElementById("btn-voz-ayuda");
+    const cerrarVoz = document.querySelector(".cerrar-voz");
+    btnVozAyuda.addEventListener("click", () => { modalVoz.style.display = "block"; });
+    cerrarVoz.addEventListener("click", () => { modalVoz.style.display = "none"; });
+    window.addEventListener("click", (e) => { if(e.target===modalVoz){ modalVoz.style.display="none"; } });
   </script>
 </body>
 </html>

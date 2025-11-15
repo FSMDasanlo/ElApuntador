@@ -258,13 +258,6 @@ header .acciones button:hover {
   background: #ddd;
 }
 
-main.marcador {
-  width: 100%;
-  max-width: 900px;
-  display: flex;
-  justify-content: center;
-}
-
 main.marcador .tabla {
   width: 100%;
   overflow-x: auto;

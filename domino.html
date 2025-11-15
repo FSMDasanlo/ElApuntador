@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dominó</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style_domino.css">
   <script src="domino.js" defer></script>
+  <script src="voz-navegador.js" defer></script>
   <style>
     /* ===== Modal de ayuda ===== */
     .modal {
@@ -93,26 +94,34 @@
   </style>
 </head>
 <body class="juego">
-  <header>
-    <h1 id="nombre-juego">
-      DOMINO
-      <button id="btn-ayuda" title="Ver instrucciones" class="btn-help">
-	  
-        <!-- Ícono SVG de información -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-          <circle cx="12" cy="12" r="10" fill="none"/>
-          <text x="12" y="16" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold">i</text>
-        </svg>
-      </button>
-    </h1>
-	
-    <p id="mensaje-juego">Puntos:<input type="number" id="meta-puntos" value="40" min="100" style="width:80px; text-align:center;"></p>
-    <div class="acciones">
-      <button class="btn-accion" onclick="window.location.href='juegos.html'">← A juegos</button>
-      <button class="btn-accion" onclick="limpiarPuntuaciones()">🧹 Borrar</button>
-      <button class="btn-accion" onclick="window.location.href='gestion_jugadores.html'">👥 Jugadores</button>
-      <button class="btn-accion" onclick="agregarFila()">➕ Añadir fila</button>
+<div class="contenedor-juego">
+  <header class="header-juego">
+    <div class="titulo">
+      <h1 id="nombre-juego">
+        DOMINÓ
+        <button id="btn-ayuda" title="Ver instrucciones" class="btn-help">
+          <!-- Ícono SVG de información -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+            <circle cx="12" cy="12" r="10" fill="none"/>
+            <text x="12" y="16" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold">i</text>
+          </svg>
+        </button>
+      </h1>
+      <p id="mensaje-juego">Puntos:<input type="number" id="meta-puntos" value="40" min="10" style="width:80px; text-align:center;"></p>
     </div>
+    <div class="acciones">
+        <button class="btn-accion" onclick="window.location.href='juegos.html'">← A juegos</button>
+        <button class="btn-accion" onclick="limpiarPuntuaciones()">🧹 Borrar</button>
+        <button class="btn-accion" onclick="window.location.href='gestion_jugadores.html'">👥 Nombres</button>
+        <button class="btn-accion" onclick="agregarFila()">➕ Añadir fila</button>
+        <div class="grupo-voz">
+          <button id="btn-voz">🎤 Puntos x voz</button>
+          <button id="btn-voz-ayuda" title="Ver comandos de voz" class="btn-help" style="background-color: #f1c40f;">
+            i
+          </button>
+        </div>
+      </div>
+      <button id="btn-detener-voz" style="display:none; background-color: #e74c3c; color: white; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-weight: bold; cursor: pointer; margin-top: 10px;">🛑 Detener voz</button>
   </header>
 
   <main class="marcador">
@@ -126,6 +135,7 @@
       </table>
     </div>
   </main>
+</div>
 
   <!-- Modal de ayuda -->
   <div id="modal-ayuda" class="modal">
@@ -154,6 +164,29 @@
     </div>
   </div>
 
+  <!-- Modal para la ayuda de voz -->
+  <div id="modal-voz-ayuda" class="modal">
+    <div class="modal-contenido">
+      <span class="cerrar-voz">&times;</span>
+      <h2>Comandos de Voz</h2>
+      <p>Pulsa el botón <strong>"🎤 Puntos x voz"</strong> para iniciar la escucha. La aplicación rellenará la tabla a medida que dictes las puntuaciones.</p>
+      
+      <h4>Añadir Puntuación:</h4>
+      <p>Di el nombre del jugador seguido de los puntos. La app buscará la primera fila vacía para ese jugador. Ejemplos:</p>
+      <ul>
+        <li><em>"Jesús veinte"</em></li>
+        <li><em>"Ana cero"</em></li>
+      </ul>
+
+      <h4>Comandos Generales:</h4>
+      <ul>
+        <li><strong>"Deshacer"</strong> o <strong>"Corrige"</strong>: Borra la última puntuación introducida.</li>
+        <li><strong>"Reiniciar"</strong> o <strong>"Borrar todo"</strong>: Limpia todas las puntuaciones de la tabla.</li>
+        <li><strong>"Apaga micro"</strong>: Detiene la escucha de voz.</li>
+      </ul>
+    </div>
+  </div>
+
   <script>
     // === Comportamiento del modal de ayuda ===
     const modal = document.getElementById("modal-ayuda");
@@ -173,6 +206,14 @@
         modal.style.display = "none";
       }
     });
+
+    // Lógica para el modal de ayuda de voz
+    const modalVoz = document.getElementById("modal-voz-ayuda");
+    const btnVozAyuda = document.getElementById("btn-voz-ayuda");
+    const cerrarVoz = document.querySelector(".cerrar-voz");
+    btnVozAyuda.addEventListener("click", () => { modalVoz.style.display = "block"; });
+    cerrarVoz.addEventListener("click", () => { modalVoz.style.display = "none"; });
+    window.addEventListener("click", (e) => { if(e.target===modalVoz){ modalVoz.style.display="none"; } });
   </script>
 </body>
 </html>

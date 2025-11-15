@@ -1,0 +1,197 @@
+/*
+ * style_dadospuntos.css
+ * Estilos específicos para el juego "Carrera de Dados", basados en style_avaricioso.css.
+ */
+
+/* ======================================================= */
+/* ===== LAYOUT GENERAL Y CENTRADO ======================= */
+/* ======================================================= */
+
+body.juego {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
+  margin: 0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Contenedor principal para el header y la tabla */
+.contenedor-juego {
+  width: 100%;
+  max-width: 1200px; /* Ancho máximo para todo el contenido */
+}
+
+/* ======================================================= */
+/* ===== HEADER Y BOTONES ================================ */
+/* ======================================================= */
+
+.header-juego {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.header-juego .titulo {
+  margin-bottom: 1rem;
+}
+
+.header-juego h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4a90e2;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.header-juego p {
+  font-size: 1rem;
+  color: #555;
+  margin: 0.2rem 0 0.8rem 0;
+}
+
+.acciones {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.btn-accion, #btn-voz {
+  padding: 0.7rem 1.2rem;
+  border-radius: 10px;
+  border: none;
+  background: #4a90e2;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btn-accion:hover, #btn-voz:hover {
+  background: #357ab8;
+  transform: translateY(-2px);
+}
+
+/* Botón de detener voz */
+#btn-detener-voz {
+  margin-top: 0.5rem;
+}
+
+/* ======================================================= */
+/* ===== TABLA Y RANKING ================================= */
+/* ======================================================= */
+
+main.marcador {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tabla {
+  width: 100%;
+  overflow-x: auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  padding: 1rem;
+}
+
+#tabla-puntos {
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.95rem;
+  margin: 0 auto;
+}
+
+#tabla-puntos th, #tabla-puntos td {
+  border: 1px solid #e0e0e0;
+  padding: 0.4rem 0.3rem;
+  text-align: center;
+  width: 80px;
+}
+
+#tabla-puntos th {
+  background: #4a90e2;
+  color: white;
+  font-weight: 600;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Fila de totales y nombres */
+#fila-totales th { background-color: #357ab8; }
+#fila-nombres th { background-color: #6b93c9; }
+
+/* Resaltar máximo y mínimo en totales */
+#fila-totales th[maximo] { background-color: #50c878; }
+#fila-totales th[minimo] { background-color: #f5a623; }
+
+#tabla-puntos td[contenteditable="true"] {
+  background: #f9f9f9;
+  cursor: text;
+  transition: background 0.2s;
+}
+
+#tabla-puntos td[contenteditable="true"]:focus {
+  outline: 2px solid #4a90e2;
+  background: #ffffff;
+}
+
+.rank-prefix-col {
+  display: block;
+  background-color: #50c878;
+  color: white;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin: 0 auto 4px auto;
+  max-width: 40px;
+  min-height: 15px;
+}
+
+.ranking {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 1rem;
+  width: 100%;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ranking h3 { margin-bottom:0.5rem; font-size:1.2rem; color:#4a90e2; }
+.ranking ol { list-style-position: inside; padding-left: 0; }
+.ranking li { margin-bottom: 0.3rem; padding: 0.3rem 0.5rem; border-radius: 6px; font-weight: 500; color: white; }
+.ranking li:nth-child(1) { background: #50c878; }
+.ranking li:nth-child(2) { background: #f5d142; }
+.ranking li:nth-child(3) { background: #ff7f50; }
+
+/* ======================================================= */
+/* ===== MODALES Y BOTONES DE AYUDA ====================== */
+/* ======================================================= */
+
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+.modal-contenido { background-color: #fff; margin: 10% auto; padding: 1.5rem; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.modal-contenido h2 { color: #4a90e2; margin-bottom: 1rem; }
+.cerrar, .cerrar-voz { color: #aaa; float: right; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
+.cerrar:hover, .cerrar-voz:hover { color: #000; }
+
+.btn-help { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; color: white; font-weight: bold; font-size: 1.2rem; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.2s, background-color 0.2s; }
+.btn-help:hover { transform: scale(1.1); }
+.grupo-voz { display: inline-flex; align-items: center; gap: 0.5rem; }
+
+/* ======================================================= */
+/* ===== RESPONSIVE ====================================== */
+/* ======================================================= */
+
+@media (max-width: 700px) {
+  .acciones { flex-direction: column; align-items: center; }
+  .header-juego h1 { font-size: 1.6rem; }
+  .tabla { padding: 0.5rem; }
+}
