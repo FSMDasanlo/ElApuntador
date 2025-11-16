@@ -16,6 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
   recognition.interimResults = false; // No queremos resultados parciales
   recognition.continuous = false; // Solo queremos un resultado final por cada escucha
 
+  // --- ¡AQUÍ ESTÁ LA MAGIA! ---
+  // Desactivamos los sonidos de "bip" que hace el navegador al reconocer.
+  recognition.onaudiostart = recognition.onaudioend = recognition.onsoundstart = recognition.onsoundend = recognition.onspeechstart = recognition.onspeechend = () => {};
+
   let isRecording = false;
 
   // --- LÓGICA DE PROCESAMIENTO (ADAPTADA DEL ANTIGUO server.js) ---
