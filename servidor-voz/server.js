@@ -3,6 +3,9 @@ const speech = require('@google-cloud/speech');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs'); // Módulo para interactuar con el sistema de archivos
+
+// Carga las variables de entorno desde el fichero .env en local
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const app = express();
@@ -19,23 +22,14 @@ app.use(express.json({ limit: '10mb' })); // Para recibir el JSON con la pregunt
 // --- CONFIGURACIÓN DEL CLIENTE DE GOOGLE (MODIFICADO PARA RENDER) ---
 const speechClientConfig = {};
 
-// Si la variable de entorno con el JSON de credenciales existe (en Render), la usamos.
+// Cuando se ejecuta en Render o en local (con .env), esta variable de entorno existirá.
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
   try {
     // Parseamos el JSON que viene como un string desde la variable de entorno
     speechClientConfig.credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-    console.log('Autenticando con Google Cloud usando credenciales de variable de entorno.');
+    console.log('Autenticando con Google Speech-to-Text usando credenciales de variable de entorno.');
   } catch (e) {
     console.error('Error al parsear GOOGLE_APPLICATION_CREDENTIALS_JSON:', e);
-  }
-} else {
-  // Si no, intentamos usar el fichero local (para desarrollo en tu PC).
-  const keyFilePath = path.join(__dirname, 'google-credentials.json');
-  if (fs.existsSync(keyFilePath)) {
-    speechClientConfig.keyFilename = keyFilePath;
-    console.log('Autenticando con Google Cloud usando fichero local de credenciales.');
-  } else {
-    console.error('¡ATENCIÓN! No se encontraron credenciales de Google. El servidor no podrá transcribir audio.');
   }
 }
 
@@ -43,7 +37,7 @@ const speechClient = new speech.SpeechClient(speechClientConfig);
 
 // --- ¡NUEVO! CONFIGURACIÓN DEL CLIENTE DE GEMINI ---
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
+const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro"});
 
 // --- ENDPOINT DE TRANSCRIPCIÓN ---
 
