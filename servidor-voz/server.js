@@ -6,7 +6,7 @@ const fs = require('fs'); // Módulo para interactuar con el sistema de archivos
 
 // Carga las variables de entorno desde el fichero .env en local
 require('dotenv').config({ path: path.join(__dirname, '.env') });
-const { VertexAI } = require('@google-cloud/vertexai'); // ¡CORREGIDO! Usamos la librería de Vertex AI
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const app = express();
 
@@ -38,18 +38,10 @@ const speechClientConfig = {};
 // Cuando se ejecuta en Render o en local (con .env), esta variable de entorno existirá.
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
   try {
-    // Parseamos el JSON que viene como un string desde la variable de entorno
-    const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-    speechClientConfig.credentials = credentials;
-
-    // --- ¡TRUCO CLAVE! ---
-    // Creamos un fichero temporal con las credenciales para que VertexAI las encuentre.
-    const credentialsPath = path.join(__dirname, 'google-credentials.json');
-    fs.writeFileSync(credentialsPath, JSON.stringify(credentials));
-    // Le decimos a las librerías de Google que usen este fichero.
-    process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
-
-    console.log('Credenciales de Google cargadas desde variable de entorno y guardadas en fichero temporal.');
+    // Simplemente parseamos las credenciales para el cliente de Speech.
+    // Ya no necesitamos el truco del fichero temporal.
+    speechClientConfig.credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+    console.log('Credenciales de Google cargadas desde variable de entorno.');
   } catch (e) {
     console.error('Error al parsear GOOGLE_APPLICATION_CREDENTIALS_JSON:', e);
   }
@@ -57,26 +49,12 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
 
 const speechClient = new speech.SpeechClient(speechClientConfig);
 
-// --- ¡NUEVO Y CORREGIDO! CONFIGURACIÓN DEL CLIENTE DE GEMINI USANDO VERTEX AI ---
-// Esto usará automáticamente las mismas credenciales de Cuenta de Servicio que Speech-to-Text.
-let model;
-try {
-  // Ahora VertexAI encontrará las credenciales a través de la variable de entorno que apunta al fichero.
-  const project = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON).project_id;
-  const location = 'us-central1'; // O la región que prefieras
-
-  if (!project) {
-    throw new Error("No se pudo determinar el 'project_id' de Google Cloud desde las credenciales.");
-  }
-
-  // Ya no necesitamos pasar las credenciales explícitamente, las encontrará solita.
-  const vertex_ai = new VertexAI({ project, location });
-  // Cambiamos a un modelo más reciente y generalmente disponible para descartar problemas de versión.
-  model = vertex_ai.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
-  console.log(`Autenticando con Gemini (Vertex AI) en el proyecto '${project}' y región '${location}'.`);
-} catch (e) {
-  console.error('Error al inicializar el cliente de Vertex AI (Gemini):', e);
-}
+// --- CONFIGURACIÓN DE GEMINI (MÉTODO SIMPLIFICADO) ---
+// Usamos la clave de API que SÍ funciona con esta librería.
+// La librería @google/generative-ai está diseñada para usar API Keys.
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+console.log('Cliente de Gemini inicializado con API Key.');
 
 // --- ENDPOINT DE TRANSCRIPCIÓN ---
 
@@ -146,7 +124,7 @@ app.post('/pregunta-ia', async (req, res) => {
       throw new Error("El modelo de IA no se ha inicializado correctamente.");
     }
     const result = await model.generateContent(prompt);
-    
+
     // La forma moderna y segura de obtener la respuesta
     const response = result.response;
     if (!response) {
