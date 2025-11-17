@@ -1,5 +1,5 @@
 let jugadores = [];
-const numJugadas = 6; // MODIFICACIÓN 1: Se reduce de 7 a 6 jugadas
+const numJugadas = 7; // Hay 7 rondas, de 7 a 13 cartas.
 let historialPuntuaciones = []; // Para la función de deshacer
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -23,6 +23,7 @@ function actualizarTabla() {
     // --- ¡LA MALDAD! (Parte JS) ---
     // Creamos spans separados para el ranking y el nombre para poder estilizarlos.
     const rankPrefix = rankMap.get(jugador.nombre) || '';
+    const rankNumber = rankPrefix ? parseInt(rankPrefix) : 0;
     const spanRank = document.createElement('span');
     spanRank.className = 'rank-prefix';
     spanRank.textContent = rankPrefix;
@@ -30,6 +31,10 @@ function actualizarTabla() {
     const spanName = document.createElement('span');
     spanName.className = 'rank-name';
     spanName.textContent = jugador.nombre;
+
+    if (rankNumber > 0 && rankNumber <= 3) {
+      spanRank.classList.add(`rank-${rankNumber}`);
+    }
 
     tdNombre.appendChild(spanRank);
     tdNombre.appendChild(spanName);
@@ -94,7 +99,7 @@ function actualizarTabla() {
 
 /**
  * Calcula el ranking actual y devuelve un mapa con la posición de cada jugador.
- * @returns {Map<string, string>} Un mapa donde la clave es el nombre y el valor es el prefijo del ranking (ej: "1º ").
+ * @returns {Map<string, string>} Un mapa donde la clave es el nombre y el valor es el prefijo del ranking (ej: "1º").
  */
 function obtenerMapaDeRanking() {
   const jugadoresConTotal = jugadores.map(j => ({ ...j, total: calcularTotal(j) }));
@@ -107,7 +112,7 @@ function obtenerMapaDeRanking() {
     if (jugador.total !== lastScore) {
       currentRank = index + 1;
     }
-    rankMap.set(jugador.nombre, `${currentRank}º `);
+    rankMap.set(jugador.nombre, `${currentRank}º`);
     lastScore = jugador.total;
   });
   return rankMap;
@@ -125,10 +130,15 @@ function actualizarNombresConRanking() {
 
     const nombreOriginal = jugadores[index].nombre;
     const rankPrefix = rankMap.get(nombreOriginal) || '';
+    const rankNumber = rankPrefix ? parseInt(rankPrefix) : 0;
 
     const spanRank = document.createElement('span');
     spanRank.className = 'rank-prefix';
-    spanRank.textContent = rankPrefix;
+    spanRank.textContent = rankPrefix ? `${rankPrefix} ` : ''; // Añadimos el espacio aquí
+
+    if (rankNumber > 0 && rankNumber <= 3) {
+      spanRank.classList.add(`rank-${rankNumber}`);
+    }
 
     const spanName = document.createElement('span');
     spanName.className = 'rank-name';

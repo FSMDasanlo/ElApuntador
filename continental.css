@@ -63,8 +63,24 @@ body.juego {
 } 
 
 /* Cabeceras 'Jugador' y 'Total' un poco más oscuras para diferenciarlas */
-#tabla-puntos th:first-child, #tabla-puntos th:last-child { background-color: #357ab8; }
+/* Hacemos el selector más específico para que solo afecte a la primera fila del thead */
+#tabla-puntos thead tr:first-child > th:first-child, #tabla-puntos thead tr:first-child > th:last-child { background-color: #357ab8; }
 
+/* --- NUEVOS ESTILOS PARA LA CABECERA DE DOS FILAS --- */
+
+/* Estilo para la primera fila de la cabecera (7 Cartas, 8 Cartas...) */
+#tabla-puntos thead tr:first-child th {
+  vertical-align: middle; /* Centra verticalmente el texto en celdas con rowspan */
+}
+
+/* Estilo para la segunda fila de la cabecera (descripción de la jugada) */
+#tabla-puntos thead tr:nth-child(2) td {
+  background-color: #f0f8ff; /* Un azul muy claro, casi blanco */
+  color: #555;
+  font-size: 0.75rem; /* Letra más pequeña para la descripción */
+  font-weight: normal;
+  text-align: center;
+}
 
 /* Celda de nombre del jugador (TD:first-child) */
 #tabla-puntos td:first-child { 
@@ -89,6 +105,12 @@ body.juego {
   min-width: 25px; /* Ancho mínimo para que todos se vean parecidos */
   text-align: center;
 }
+
+/* --- NUEVO: Colores para el podio del ranking --- */
+.rank-prefix.rank-1 { background-color: #28a745; } /* Verde para el 1º */
+.rank-prefix.rank-2 { background-color: #ff9800; } /* Naranja para el 2º */
+.rank-prefix.rank-3 { background-color: #dc3545; } /* Rojo para el 3º */
+
 
 /* Celdas de puntuación editables */
 #tabla-puntos td[contenteditable="true"] { 

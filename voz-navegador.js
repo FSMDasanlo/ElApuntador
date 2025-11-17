@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dataArray = new Uint8Array(bufferLength);
 
     const UMBRAL_SILENCIO = 20; // Umbral de volumen (0-255). Ajustable.
-    const TIEMPO_SILENCIO_MS = 1500; // 1.5 segundos.
+    const TIEMPO_SILENCIO_MS = 3000; // 3 segundos.
 
     const verificar = () => {
       analizador.getByteFrequencyData(dataArray);
@@ -250,8 +250,31 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (resultado && resultado.type === 'command' && resultado.command === 'hush') {
       console.log('Comando de silenciar voz reconocido.');
       window.speechSynthesis.cancel();
+    } else if (transcripcion) {
+      // Si no es un comando ni una puntuación, es una pregunta para la IA
+      console.log(`Pregunta no reconocida, enviando a la IA: "${transcripcion}"`);
+      enviarPreguntaIA(transcripcion);
     } else {
       console.warn('No se pudo interpretar la orden.');
+    }
+  }
+
+  /**
+   * ¡NUEVA FUNCIÓN! Envía una pregunta de texto a la IA y lee la respuesta.
+   * @param {string} pregunta El texto de la pregunta del usuario.
+   */
+  async function enviarPreguntaIA(pregunta) {
+    // Recopilamos el estado actual del juego (depende de cada juego, aquí usamos el de Continental)
+    const estadoJuego = window.jugadores || []; // Asumimos que 'jugadores' está disponible globalmente
+
+    const response = await fetch(`${URL_SERVIDOR_VOZ}/pregunta-ia`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pregunta, estadoJuego })
+    });
+    const data = await response.json();
+    if (data.respuesta) {
+      hablarTexto(data.respuesta);
     }
   }
 });
