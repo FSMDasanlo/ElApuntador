@@ -15,7 +15,6 @@
   "license": "ISC",
   "dependencies": {
     "@google-cloud/speech": "^7.2.1",
-    "@google-cloud/vertexai": "^1.10.0",
     "@google/generative-ai": "^0.16.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
