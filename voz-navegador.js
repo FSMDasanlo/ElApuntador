@@ -229,33 +229,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function procesarTranscripcion(transcripcion) {
     const jugadores = JSON.parse(localStorage.getItem("jugadores")) || [];
-    const resultado = parsearTranscripcion(transcripcion, jugadores);
+    const resultadoParseo = parsearTranscripcion(transcripcion, jugadores);
 
-    if (Array.isArray(resultado)) { // Es una lista de puntuaciones
-      console.log('Múltiples datos procesados:', resultado);
-      resultado.forEach(res => {
+    // 1. Primero, comprobamos si es un comando.
+    if (resultadoParseo && resultadoParseo.type === 'command') {
+      console.log(`Comando reconocido: ${resultadoParseo.command}`);
+      if (resultadoParseo.command === 'stop') {
+        detenerGrabacion();
+      } else if (resultadoParseo.command === 'clear') {
+        if (window.limpiarPuntuaciones) window.limpiarPuntuaciones();
+      } else if (resultadoParseo.command === 'undo') {
+        if (window.deshacerUltimaPuntuacion) window.deshacerUltimaPuntuacion();
+      } else if (resultadoParseo.command === 'hush') {
+        window.speechSynthesis.cancel();
+      }
+    // 2. Si no es un comando, comprobamos si es una o más puntuaciones.
+    } else if (Array.isArray(resultadoParseo) && resultadoParseo.length > 0) {
+      console.log('Puntuaciones procesadas:', resultadoParseo);
+      resultadoParseo.forEach(res => {
         if (res.type === 'score' && window.actualizarPuntosPorVoz) {
           window.actualizarPuntosPorVoz(res.jugador, res.puntos);
         }
       });
-    } else if (resultado && resultado.type === 'command') { // Es un comando único
-      console.log('Comando de detener voz reconocido.');
-      detenerGrabacion();
-    } else if (resultado && resultado.type === 'command' && resultado.command === 'clear') {
-      console.log('Comando de reiniciar partida reconocido.');
-      if (window.limpiarPuntuaciones) window.limpiarPuntuaciones();
-    } else if (resultado && resultado.type === 'command' && resultado.command === 'undo') {
-      console.log('Comando de deshacer reconocido.');
-      if (window.deshacerUltimaPuntuacion) window.deshacerUltimaPuntuacion();
-    } else if (resultado && resultado.type === 'command' && resultado.command === 'hush') {
-      console.log('Comando de silenciar voz reconocido.');
-      window.speechSynthesis.cancel();
-    } else if (transcripcion) {
+    // 3. Si no es ni un comando ni una puntuación, ¡es una pregunta para la IA!
+    } else {
       // Si no es un comando ni una puntuación, es una pregunta para la IA
       console.log(`Pregunta no reconocida, enviando a la IA: "${transcripcion}"`);
       enviarPreguntaIA(transcripcion);
-    } else {
-      console.warn('No se pudo interpretar la orden.');
     }
   }
 
@@ -264,8 +264,15 @@ document.addEventListener('DOMContentLoaded', () => {
    * @param {string} pregunta El texto de la pregunta del usuario.
    */
   async function enviarPreguntaIA(pregunta) {
-    // Recopilamos el estado actual del juego (depende de cada juego, aquí usamos el de Continental)
-    const estadoJuego = window.jugadores || []; // Asumimos que 'jugadores' está disponible globalmente
+    // --- CORREGIDO: Recopilamos un resumen del estado del juego ---
+    // En lugar de enviar todos los datos, enviamos solo el nombre y el total.
+    let estadoJuego = [];
+    if (window.jugadores && typeof window.calcularTotal === 'function') {
+      estadoJuego = window.jugadores.map(jugador => ({
+        nombre: jugador.nombre,
+        total: window.calcularTotal(jugador)
+      }));
+    }
 
     const response = await fetch(`${URL_SERVIDOR_VOZ}/pregunta-ia`, {
       method: 'POST',
