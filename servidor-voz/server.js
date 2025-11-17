@@ -36,8 +36,10 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
 const speechClient = new speech.SpeechClient(speechClientConfig);
 
 // --- ¡NUEVO! CONFIGURACIÓN DEL CLIENTE DE GEMINI ---
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-pro" }, { apiVersion: 'v1' });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: 'v1' });
+
+// Usamos el modelo "gemini-pro", que es el estándar y más compatible para tareas de texto.
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
 // --- ENDPOINT DE TRANSCRIPCIÓN ---
 
