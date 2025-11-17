@@ -36,8 +36,8 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
 const speechClient = new speech.SpeechClient(speechClientConfig);
 
 // --- ¡NUEVO! CONFIGURACIÓN DEL CLIENTE DE GEMINI ---
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: 'v1' });
-const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
 // --- ENDPOINT DE TRANSCRIPCIÓN ---
 
@@ -103,12 +103,16 @@ app.post('/pregunta-ia', async (req, res) => {
   `;
 
   try {
+    if (!model) {
+      throw new Error("El modelo de IA no se ha inicializado correctamente.");
+    }
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
     console.log(`Respuesta de la IA: "${text}"`);
     res.json({ respuesta: text });
   } catch (error) {
+    // Logueamos el error completo para poder depurarlo en Render
     console.error('ERROR en la API de Gemini:', error);
     res.status(500).json({ error: 'Error al contactar con la IA.' });
   }
