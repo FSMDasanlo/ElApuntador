@@ -146,8 +146,14 @@ app.post('/pregunta-ia', async (req, res) => {
       throw new Error("El modelo de IA no se ha inicializado correctamente.");
     }
     const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    
+    // La forma moderna y segura de obtener la respuesta
+    const response = result.response;
+    if (!response) {
+      throw new Error("La IA no devolvió una respuesta válida.");
+    }
+
+    const text = response.text(); // .text() es una función que extrae el texto
     console.log(`Respuesta de la IA: "${text}"`);
     res.json({ respuesta: text });
   } catch (error) {
