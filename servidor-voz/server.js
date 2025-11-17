@@ -6,7 +6,7 @@ const fs = require('fs'); // Módulo para interactuar con el sistema de archivos
 
 // Carga las variables de entorno desde el fichero .env en local
 require('dotenv').config({ path: path.join(__dirname, '.env') });
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { VertexAI } = require('@google-cloud/vertexai');
 
 const app = express();
 
@@ -38,10 +38,19 @@ const speechClientConfig = {};
 // Cuando se ejecuta en Render o en local (con .env), esta variable de entorno existirá.
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
   try {
-    // Simplemente parseamos las credenciales para el cliente de Speech.
-    // Ya no necesitamos el truco del fichero temporal.
-    speechClientConfig.credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-    console.log('Credenciales de Google cargadas desde variable de entorno.');
+    // --- ESTRATEGIA DEFINITIVA PARA RENDER ---
+    // 1. Parseamos las credenciales desde la variable de entorno.
+    const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+    speechClientConfig.credentials = credentials;
+
+    // 2. Creamos un fichero temporal con las credenciales.
+    // Las librerías de Google Cloud (como VertexAI) lo buscan por defecto.
+    const credentialsPath = path.join(__dirname, 'google-credentials.json');
+    fs.writeFileSync(credentialsPath, JSON.stringify(credentials));
+
+    // 3. Le decimos al proceso dónde está ese fichero.
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
+    console.log('Credenciales de Google cargadas y configuradas para todo el entorno.');
   } catch (e) {
     console.error('Error al parsear GOOGLE_APPLICATION_CREDENTIALS_JSON:', e);
   }
@@ -49,12 +58,20 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
 
 const speechClient = new speech.SpeechClient(speechClientConfig);
 
-// --- CONFIGURACIÓN DE GEMINI (MÉTODO SIMPLIFICADO) ---
-// Usamos la clave de API que SÍ funciona con esta librería.
-// La librería @google/generative-ai está diseñada para usar API Keys.
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-console.log('Cliente de Gemini inicializado con API Key.');
+// --- CONFIGURACIÓN DE GEMINI (MÉTODO VERTEX AI - CORRECTO PARA SERVIDORES) ---
+let model;
+try {
+  const project = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON).project_id;
+  const location = 'us-central1';
+
+  const vertex_ai = new VertexAI({ project, location });
+
+  // Usamos el nombre de modelo más genérico y compatible para Vertex AI.
+  model = vertex_ai.getGenerativeModel({ model: 'gemini-pro' });
+  console.log(`Cliente de Gemini (Vertex AI) inicializado en proyecto '${project}'.`);
+} catch (e) {
+  console.error('Error al inicializar el cliente de Vertex AI (Gemini):', e);
+}
 
 // --- ENDPOINT DE TRANSCRIPCIÓN ---
 
