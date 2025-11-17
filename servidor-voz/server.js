@@ -62,7 +62,7 @@ const speechClient = new speech.SpeechClient(speechClientConfig);
 let model;
 try {
   const project = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON).project_id;
-  const location = 'us-central1';
+  const location = 'europe-west1'; // Usamos una región con alta disponibilidad de modelos
 
   const vertex_ai = new VertexAI({ project, location });
 
