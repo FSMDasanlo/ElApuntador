@@ -13,7 +13,7 @@ const app = express();
 // --- CONFIGURACIÓN ---
 
 // Lista de orígenes permitidos. Deberías añadir la URL de tu frontend en producción.
-const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:5500', 'https://tu-dominio-frontend.com'];
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:5500', 'https://fsmdasanlo.github.io'];
 const corsOptions = {
   origin: function (origin, callback) {
     // Permite peticiones sin 'origin' (como apps móviles o Postman) y las de la lista.
