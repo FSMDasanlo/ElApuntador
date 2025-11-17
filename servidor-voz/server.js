@@ -37,7 +37,7 @@ const speechClient = new speech.SpeechClient(speechClientConfig);
 
 // --- ¡NUEVO! CONFIGURACIÓN DEL CLIENTE DE GEMINI ---
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+const model = genAI.getGenerativeModel({ model: "gemini-pro" }, { apiVersion: 'v1' });
 
 // --- ENDPOINT DE TRANSCRIPCIÓN ---
 
