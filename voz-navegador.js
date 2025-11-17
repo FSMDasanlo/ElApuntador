@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
   const btnVoz = document.getElementById('btn-voz');
   const btnDetenerVoz = document.getElementById('btn-detener-voz');
-  // URL del servidor de voz en la nube (Render).
-  const URL_SERVIDOR_VOZ = 'https://elapuntador.onrender.com';
+
+  // Detecta si estamos en local (file:// o localhost) o en producción.
+  const esLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const URL_SERVIDOR_VOZ = esLocal ? 'http://localhost:3000' : 'https://elapuntador.onrender.com';
   
   // --- NUEVA ARQUITECTURA: MediaRecorder + Servidor con IA de Google ---
 

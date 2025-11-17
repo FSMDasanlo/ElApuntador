@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "elapuntador",
+  "private_key_id": "e2014e6c78b4753934a6f394f3a5d5eb4bba871c",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDsLTtTlaguqPP3\nybF+YUvrHNYiD4f4RcEd4v8+2NfeNYRA2tx/FYTTFMihddhXfMuymEmEKC7WMSsL\nwvaFejgdGerc1bAyxRtFFpkoxVkZjUlaVcI8CjAwd6F/mJVl8iWTDUMTVPrFc7y6\nH7+dXRa4Z6CiOdM/7yrCGZZjJ28rV8wr0db2HMAb7EsEwkxoOTPER8/OhN8XnAu+\n0G6FQc7HAVrr2fQuKyD0TiDvpnfcREEcr/Oe8snA0iQD1MCmZzqPA7Mx+NUyQaPw\nDfN9Z2kbe3BmR2Vk70j3gZxlxJO24Tpc2bBumfQKQf7l4/6FquamrGLQKrRIwHSE\ndd6AF5I1AgMBAAECggEAFPdm/uKYTZweHG9BXJDSpoqmz9tFHNtEa5zNQA0MDOP/\nW6qSTI3ifsKnlP3bONkRVEeEr0DJ96XhxmeGbw8MkDjOytAFllw9MYLyEdaDNGuA\niY53cdENuh/ErIklKim3ADj7LWor4P+HT5al8hhjffdlIUG06UYYK6cN3LuReO1k\nugDyy/zBfrzezHU+g2auguNfBALWF8EF1wvMuU2SsfNeDHm2qZLeaXpBUc6nJ5Ph\n/pGcKr00g6k+EUAelYyGckQDMweQXP8q69Rssu7Zeac85BqQowThGBD8hxOs5mbC\nU5Fid6yy8L/TIBSBrOeohyci0wd53KJpLATTWfSZeQKBgQD+SX3PDmFoREnIuEyl\n6PaAfjHhW/YcdSZ7QKZq4g3TubYLPcLw0V1fyCJTkfPAOnx/YGcjcd9Je9lqaXL9\nvZJ+jA8tSxRzb+xHlifEgtMp8KMNIoPAhOAuDhso5I0p3bF8ucMgd5Bg7CZRZ0FC\n7aQt2AhAG9fDqF6kvswhvMls6wKBgQDtxIJ2CyDrzBciDZ+sRuLegIZQr4zR1UaW\nvO0J1lHQTbWeXIWVIF3Q0mECQL8VWECad2VLMEWbgxy65sKSWLi/79agKzyWXC7R\ns/RqrEbJTz89MEBmPE6jXMStDkajkya7grdA+tuyvCCcg6sEC8d5DrjRNOH+QxZQ\nU0JzKIK1XwKBgAuCG/WA+xuS65vv61ge4PkTvQIr/Ulwa9tsI5v2uxV39CsyEl5/\nuzAYiKUrl9J9UyEYpdJO1wImXsKYHyIosDaV9CHiofxPdmwO+aHFIfVl9Jslkrzl\nxpeO/9+r6E+avuucJJ6Viq04QsuwVp3Gz4Vbn5P3Lp6mQhJGqEpmlt8dAoGAXxFf\niItSknV8GmWQHnYJaCXDjqdiitPX8ZWAwZosBDnOEI+16baTTFeR6jCxNnue+SQc\nIEAg1NlLt39k9Nb8p+Hh0xD2nLgnEDn/1FclxoAlLPYKCda7Kp6BFSDMJcNEjVzq\noNSs235VG7+ZtXhwPXshcqTOZ7ezSFLCEwFzockCgYEA1ishoKvYCeQDjhbgjdPf\nwt0Dls2RwuHDb3K3XxHMHd8wYrn4ubaHLrUgk9jboa7mK56XujeHE/V7hJjQ1RJ7\nLvgKP/IwYvb4xvIs5bKgLfo1moKXzneHa9eXnFuIf50DVXRzWfrR/nyZRphLwUto\n7rRySG1jg7NWDhOBgrUEMFA=\n-----END PRIVATE KEY-----\n",
+  "client_email": "elapuntadorvoz-486@elapuntador.iam.gserviceaccount.com",
+  "client_id": "109403886001086500504",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/elapuntadorvoz-486%40elapuntador.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
