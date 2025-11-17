@@ -1,57 +1,55 @@
 document.addEventListener('DOMContentLoaded', () => {
   const btnVoz = document.getElementById('btn-voz');
   const btnDetenerVoz = document.getElementById('btn-detener-voz');
+  // URL del servidor de voz en la nube (Render).
+  const URL_SERVIDOR_VOZ = 'https://elapuntador.onrender.com';
+  
+  // --- NUEVA ARQUITECTURA: MediaRecorder + Servidor con IA de Google ---
 
-  // Comprobamos si el navegador soporta la API de voz
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    console.error('El reconocimiento de voz no es soportado en este navegador.');
+  // Comprobamos si el navegador soporta la API de MediaRecorder para grabar audio
+  if (!navigator.mediaDevices || !window.MediaRecorder) {
+    console.error('La grabación de audio (MediaRecorder) no es soportada en este navegador.');
     btnVoz.disabled = true;
     btnVoz.textContent = '🎤 No Soportado';
     return;
   }
 
-  const recognition = new SpeechRecognition();
-  recognition.lang = 'es-ES';
-  recognition.interimResults = false; // No queremos resultados parciales
-  recognition.continuous = false; // Solo queremos un resultado final por cada escucha
+  let mediaRecorder;
+  let audioChunks = [];
+  let streamMicrofono; // Para poder detener el micrófono y que se apague el piloto rojo
 
-  // --- ¡AQUÍ ESTÁ LA MAGIA! ---
-  // Desactivamos los sonidos de "bip" que hace el navegador al reconocer.
-  recognition.onaudiostart = recognition.onaudioend = recognition.onsoundstart = recognition.onsoundend = recognition.onspeechstart = recognition.onspeechend = () => {};
-
-  let isRecording = false;
+  // --- NUEVO: Para la detección de silencio ---
+  let silencioTimeout;
+  let audioContext;
+  let analizador;
 
   // --- LÓGICA DE PROCESAMIENTO (ADAPTADA DEL ANTIGUO server.js) ---
-
+  
   /**
-   * Función para extraer el nombre y los puntos de un texto.
-   * Ej: "Ana veinte" -> { jugador: "Ana", puntos: 20 }
+   * Función para extraer múltiples puntuaciones de un texto.
+   * Ej: "Ana veinte, Felipe menos doce" -> [{ jugador: "Ana", puntos: 20 }, { jugador: "Felipe", puntos: -12 }]
+   * @param {string} texto La transcripción de voz.
+   * @param {string[]} jugadores La lista de nombres de jugadores.
+   * @returns {object[]|object|null} Un array de objetos de puntuación, un objeto de comando, o null.
    */
   function parsearTranscripcion(texto, jugadores) {
-    const palabras = texto.toLowerCase().split(' ');
-    let jugadorEncontrado = null;
-    let puntosEncontrados = null;
+    const textoMinusculas = texto.toLowerCase();
+    const resultados = [];
 
     // --- 1. BUSCAMOS COMANDOS PRIMERO ---
-    const textoMinusculas = texto.toLowerCase();
     if (textoMinusculas.includes('apaga micro') || textoMinusculas.includes('apagar micro') || textoMinusculas.includes('detener micro')) {
-      // Si encontramos un comando para detener, lo devolvemos con un tipo especial.
       return { type: 'command', command: 'stop' };
     }
 
     if (textoMinusculas.includes('reiniciar') || textoMinusculas.includes('borrar todo') || textoMinusculas.includes('nueva partida')) {
-      // Comando para limpiar la tabla
       return { type: 'command', command: 'clear' };
     }
 
     if (textoMinusculas.includes('deshacer') || textoMinusculas.includes('corrige') || textoMinusculas.includes('borra la última')) {
-      // Comando para deshacer la última acción
       return { type: 'command', command: 'undo' };
     }
 
     if (textoMinusculas.includes('vale') || textoMinusculas.includes('calla') || textoMinusculas.includes('silencio')) {
-      // Comando para detener la síntesis de voz
       return { type: 'command', command: 'hush' };
     }
 
@@ -59,144 +57,203 @@ document.addEventListener('DOMContentLoaded', () => {
       'cero': 0, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4, 'cinco': 5,
       'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10,
       'once': 11, 'doce': 12, 'trece': 13, 'catorce': 14, 'quince': 15,
-      'dieciseis': 16, 'diecisiete': 17, 'dieciocho': 18, 'diecinueve': 19,
-      'veinte': 20, 'veintiuno': 21, 'veintidos': 22, 'veintitres': 23, 'veinticuatro': 24,
+      'dieciséis': 16, 'diecisiete': 17, 'dieciocho': 18, 'diecinueve': 19,
+      'veinte': 20, 'veintiuno': 21, 'veintidós': 22, 'veintitrés': 23, 'veinticuatro': 24,
       'veinticinco': 25, 'veintiseis': 26, 'veintisiete': 27, 'veintiocho': 28, 'veintinueve': 29,
       'treinta': 30, 'cuarenta': 40, 'cincuenta': 50, 'sesenta': 60, 'setenta': 70,
       'ochenta': 80, 'noventa': 90, 'cien': 100
     };
 
-    // Normalizamos el texto para facilitar el parseo (ej: "treinta y uno" -> "treinta uno")
     const textoNormalizado = texto.toLowerCase().replace(/\s+y\s+/g, ' ');
     const palabrasNormalizadas = textoNormalizado.split(' ');
 
-    // --- BÚSQUEDA DE JUGADOR MEJORADA ---
-    // Buscamos la coincidencia más larga para evitar falsos positivos (ej: "Ana" y "Anabel")
-    let mejorCoincidencia = '';
-    for (const jugador of jugadores) {
-      const nombreJugadorMinusculas = jugador.toLowerCase();
-      // Comprobamos si alguna palabra reconocida empieza como el nombre de un jugador
-      // O si el nombre de un jugador empieza como una palabra reconocida (para casos como "Jesu")
-      if (palabrasNormalizadas.some(p => nombreJugadorMinusculas.startsWith(p) || p.startsWith(nombreJugadorMinusculas))) {
-        if (nombreJugadorMinusculas.length > mejorCoincidencia.length) {
-          mejorCoincidencia = jugador;
-        }
-      }
-    }
-    if (mejorCoincidencia) {
-      jugadorEncontrado = mejorCoincidencia;
-    }
+    let jugadorActual = null;
+    let puntosActuales = 0;
+    let multiplicador = 1; // Para números negativos
 
-    // --- LÓGICA DE PARSEO DE NÚMEROS MEJORADA ---
-    let sumaParcial = 0;
     for (const palabra of palabrasNormalizadas) {
-      // Primero, intentamos convertir la palabra a un número directamente (ej: "25")
-      if (!isNaN(parseInt(palabra))) {
-        sumaParcial += parseInt(palabra);
-        continue; // Pasamos a la siguiente palabra por si es un número compuesto
+      // Comprobamos si la palabra es un jugador
+      const jugadorEncontrado = jugadores.find(j => j.toLowerCase() === palabra);
+
+      if (jugadorEncontrado) {
+        // Si ya teníamos un jugador, guardamos su resultado antes de cambiar.
+        if (jugadorActual) {
+          resultados.push({ type: 'score', jugador: jugadorActual, puntos: puntosActuales * multiplicador });
+        }
+        // Empezamos a procesar el nuevo jugador.
+        jugadorActual = jugadorEncontrado;
+        puntosActuales = 0;
+        multiplicador = 1;
+        continue;
       }
 
-      // Si no es un número, buscamos en nuestro mapa
+      // Si no hay un jugador activo, ignoramos las palabras
+      if (!jugadorActual) continue;
+
+      // Comprobamos si es la palabra "menos"
+      if (palabra === 'menos') {
+        multiplicador = -1;
+        continue;
+      }
+
+      // Comprobamos si es un número escrito
       const valor = mapaNumeros[palabra];
       if (valor !== undefined) {
-        // Para decenas (30, 40...), si la suma ya tiene algo, es un nuevo número.
-        // Esto es una simplificación, asumimos que no se dirán números como "treinta veinte".
-        if (valor >= 30 && sumaParcial % 10 !== 0) {
-            // Ignoramos esta palabra si parece el inicio de otro número
-        } else {
-            sumaParcial += valor;
-        }
+        puntosActuales += valor;
+      } else if (!isNaN(parseInt(palabra))) { // Comprobamos si es un dígito
+        puntosActuales += parseInt(palabra);
       }
     }
-    if (sumaParcial > 0 || (palabrasNormalizadas.includes('cero') && jugadorEncontrado)) {
-        puntosEncontrados = sumaParcial;
+
+    // Guardamos el último resultado que se estaba procesando
+    if (jugadorActual) {
+      resultados.push({ type: 'score', jugador: jugadorActual, puntos: puntosActuales * multiplicador });
     }
 
-    if (!jugadorEncontrado || puntosEncontrados === null) {
-      return null; // No se encontró una orden válida
-    }
-
-    return { type: 'score', jugador: jugadorEncontrado, puntos: puntosEncontrados };
+    return resultados.length > 0 ? resultados : null;
   }
-
-  // --- MANEJO DE EVENTOS DE LA API DE VOZ ---
-
-  // Cuando el reconocimiento de voz termina
-  recognition.onend = () => {
-    if (isRecording) {
-      // Si estábamos grabando, volvemos a empezar a escuchar.
-      // Esto crea un ciclo de escucha continuo hasta que el usuario pulsa "Detener".
-      recognition.start();
-    }
-  };
-
-  // Cuando se detecta un resultado
-  recognition.onresult = (event) => {
-    const transcripcion = event.results[event.results.length - 1][0].transcript.trim();
-    console.log(`Texto reconocido: "${transcripcion}"`);
-
-    const jugadores = JSON.parse(localStorage.getItem("jugadores")) || [];
-    const resultado = parsearTranscripcion(transcripcion, jugadores);
-
-    if (resultado && resultado.type === 'score') {
-      console.log('Datos procesados:', resultado);
-      if (window.actualizarPuntosPorVoz) {
-        window.actualizarPuntosPorVoz(resultado.jugador, resultado.puntos);
-      }
-    } else if (resultado && resultado.type === 'command' && resultado.command === 'stop') {
-      console.log('Comando de detener voz reconocido.');
-      // Llamamos a la función que detiene la grabación.
-      detenerGrabacion();
-    } else if (resultado && resultado.type === 'command' && resultado.command === 'clear') {
-      console.log('Comando de reiniciar partida reconocido.');
-      // Llamamos a la función global de pocha.js
-      if (window.limpiarPuntuaciones) {
-        window.limpiarPuntuaciones();
-      }
-    } else if (resultado && resultado.type === 'command' && resultado.command === 'undo') {
-      console.log('Comando de deshacer reconocido.');
-      // Llamamos a la nueva función global de pocha.js
-      if (window.deshacerUltimaPuntuacion) {
-        window.deshacerUltimaPuntuacion();
-      }
-    } else if (resultado && resultado.type === 'command' && resultado.command === 'hush') {
-      console.log('Comando de silenciar voz reconocido.');
-      // Llamamos directamente a la API del navegador para cancelar la voz.
-      window.speechSynthesis.cancel();
-    } else {
-      console.warn('No se pudo interpretar la orden.');
-      // Opcional: podrías añadir un sonido o feedback visual de "no entendido".
-    }
-    
-  };
-
-  recognition.onerror = (event) => {
-    console.error('Error en el reconocimiento de voz:', event.error);
-    // Errores como 'no-speech' son comunes, simplemente los ignoramos y el onend se encargará de reiniciar.
-  };
 
   // --- FUNCIONES DE LOS BOTONES ---
 
-  const iniciarGrabacion = () => {
-    if (isRecording) return;
-    isRecording = true;
-    btnVoz.style.display = 'none';
-    btnDetenerVoz.style.display = 'inline-block';
-    recognition.start();
-    console.log("Iniciando escucha continua...");
+  const iniciarGrabacion = async () => {
+    try {
+      // 1. Iniciar grabación como antes
+      streamMicrofono = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(streamMicrofono, { mimeType: 'audio/webm' });
+
+      mediaRecorder.addEventListener('dataavailable', event => {
+        audioChunks.push(event.data);
+      });
+
+      mediaRecorder.addEventListener('stop', async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        audioChunks = [];
+        await enviarAudioAlServidor(audioBlob);
+        streamMicrofono.getTracks().forEach(track => track.stop());
+      });
+
+      mediaRecorder.start();
+      btnVoz.style.display = 'none';
+      btnDetenerVoz.style.display = 'inline-block';
+      console.log("Iniciando grabación...");
+
+      // 2. Iniciar el detector de silencio
+      detectarSilencio(streamMicrofono);
+
+    } catch (error) {
+      console.error('Error al acceder al micrófono:', error);
+      alert('No se pudo acceder al micrófono. Asegúrate de dar permiso en el navegador.');
+    }
   };
 
   const detenerGrabacion = () => {
-    if (!isRecording) return;
-    isRecording = false;
-    btnVoz.style.display = 'inline-block';
-    btnDetenerVoz.style.display = 'none';
-    recognition.stop();
-    console.log("Deteniendo escucha.");
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      // Detenemos el detector de silencio para que no interfiera
+      clearTimeout(silencioTimeout);
+      if (audioContext) audioContext.close();
+
+      mediaRecorder.stop();
+      btnVoz.style.display = 'inline-block';
+      btnDetenerVoz.style.display = 'none';
+      console.log("Deteniendo grabación.");
+    }
+  };
+
+  /**
+   * NUEVA FUNCIÓN: Analiza el audio del micrófono y llama a detenerGrabacion()
+   * si hay silencio durante más de 1.5 segundos.
+   */
+  const detectarSilencio = (stream) => {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analizador = audioContext.createAnalyser();
+    const source = audioContext.createMediaStreamSource(stream);
+    source.connect(analizador);
+
+    analizador.fftSize = 2048;
+    const bufferLength = analizador.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    const UMBRAL_SILENCIO = 20; // Umbral de volumen (0-255). Ajustable.
+    const TIEMPO_SILENCIO_MS = 1500; // 1.5 segundos.
+
+    const verificar = () => {
+      analizador.getByteFrequencyData(dataArray);
+      let suma = dataArray.reduce((a, b) => a + b, 0);
+      let promedio = suma / bufferLength;
+
+      if (promedio < UMBRAL_SILENCIO) {
+        if (!silencioTimeout) {
+          silencioTimeout = setTimeout(detenerGrabacion, TIEMPO_SILENCIO_MS);
+        }
+      } else {
+        // Si hay sonido, reseteamos el temporizador de silencio
+        clearTimeout(silencioTimeout);
+        silencioTimeout = null;
+      }
+
+      // Si todavía estamos grabando, seguimos verificando
+      if (mediaRecorder.state === 'recording') requestAnimationFrame(verificar);
+    };
+    requestAnimationFrame(verificar);
   };
 
   btnVoz.addEventListener('click', iniciarGrabacion);
   btnDetenerVoz.addEventListener('click', detenerGrabacion);
+
+  async function enviarAudioAlServidor(audioBlob) {
+    console.log("Enviando audio al servidor para transcripción...");
+    try {
+      const response = await fetch(`${URL_SERVIDOR_VOZ}/transcribir`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'audio/webm' },
+        body: audioBlob
+      });
+
+      if (!response.ok) throw new Error(`Error del servidor: ${response.statusText}`);
+
+      const data = await response.json();
+      const transcripcion = data.texto || '';
+      console.log(`Texto reconocido por la IA: "${transcripcion}"`);
+
+      if (transcripcion) {
+        procesarTranscripcion(transcripcion);
+      } else {
+        console.warn('La IA no devolvió ninguna transcripción.');
+      }
+
+    } catch (error) {
+      console.error('Error al enviar/procesar audio:', error);
+      alert('Hubo un error al contactar con el servicio de voz. Revisa la consola del navegador y del servidor.');
+    }
+  }
+
+  function procesarTranscripcion(transcripcion) {
+    const jugadores = JSON.parse(localStorage.getItem("jugadores")) || [];
+    const resultado = parsearTranscripcion(transcripcion, jugadores);
+
+    if (Array.isArray(resultado)) { // Es una lista de puntuaciones
+      console.log('Múltiples datos procesados:', resultado);
+      resultado.forEach(res => {
+        if (res.type === 'score' && window.actualizarPuntosPorVoz) {
+          window.actualizarPuntosPorVoz(res.jugador, res.puntos);
+        }
+      });
+    } else if (resultado && resultado.type === 'command') { // Es un comando único
+      console.log('Comando de detener voz reconocido.');
+      detenerGrabacion();
+    } else if (resultado && resultado.type === 'command' && resultado.command === 'clear') {
+      console.log('Comando de reiniciar partida reconocido.');
+      if (window.limpiarPuntuaciones) window.limpiarPuntuaciones();
+    } else if (resultado && resultado.type === 'command' && resultado.command === 'undo') {
+      console.log('Comando de deshacer reconocido.');
+      if (window.deshacerUltimaPuntuacion) window.deshacerUltimaPuntuacion();
+    } else if (resultado && resultado.type === 'command' && resultado.command === 'hush') {
+      console.log('Comando de silenciar voz reconocido.');
+      window.speechSynthesis.cancel();
+    } else {
+      console.warn('No se pudo interpretar la orden.');
+    }
+  }
 });
 
 /**
