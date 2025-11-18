@@ -33,39 +33,30 @@ app.use(express.raw({ type: 'audio/webm', limit: '10mb' }));
 app.use(express.json({ limit: '10mb' })); // Para recibir el JSON con la pregunta y el estado del juego
 
 // --- CONFIGURACIÓN DEL CLIENTE DE GOOGLE (MODIFICADO PARA RENDER) ---
-const speechClientConfig = {};
+let credentials;
 
 // Cuando se ejecuta en Render o en local (con .env), esta variable de entorno existirá.
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
   try {
-    // --- ESTRATEGIA DEFINITIVA PARA RENDER Y LOCAL ---
     // Parseamos las credenciales desde la variable de entorno.
-    const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-    speechClientConfig.credentials = credentials; // SpeechClient sí funciona con el objeto
-
-    // Creamos un fichero temporal con las credenciales.
-    // Las librerías de Google Cloud (como VertexAI) lo buscan por defecto si la variable de entorno apunta a él.
-    const credentialsPath = path.join(__dirname, 'google-credentials.json');
-    fs.writeFileSync(credentialsPath, JSON.stringify(credentials));
-
-    // Le decimos al proceso dónde está ese fichero. ESTA ES LA CLAVE PARA VERTEX AI.
-    process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
-    console.log('Credenciales de Google cargadas y configuradas para todo el entorno.');
+    credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+    console.log('Credenciales de Google cargadas desde la variable de entorno.');
   } catch (e) {
     console.error('Error al parsear GOOGLE_APPLICATION_CREDENTIALS_JSON:', e);
   }
 }
 
-const speechClient = new speech.SpeechClient(speechClientConfig);
+const speechClient = new speech.SpeechClient({ credentials });
 
 // --- CONFIGURACIÓN DE GEMINI (MÉTODO VERTEX AI - CORRECTO PARA SERVIDORES) ---
 let model;
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS) { // Comprobamos si el fichero se creó
+if (credentials) {
   try {
-    // VertexAI ahora encontrará las credenciales automáticamente gracias a la variable de entorno
-    const vertex_ai = new VertexAI({ project: 'elapuntador', location: 'us-central1' });
+    // Pasamos las credenciales directamente, sin necesidad de ficheros temporales.
+    // Esto es más robusto para entornos como Render.
+    const vertex_ai = new VertexAI({ project: credentials.project_id, location: 'us-central1', credentials });
     model = vertex_ai.getGenerativeModel({ model: 'gemini-1.0-pro' });
-    console.log(`Cliente de Gemini (Vertex AI) inicializado en proyecto 'elapuntador'.`);
+    console.log(`Cliente de Gemini (Vertex AI) inicializado en proyecto '${credentials.project_id}'.`);
   } catch (e) {
     console.error('Error al inicializar el cliente de Vertex AI (Gemini):', e);
   }
