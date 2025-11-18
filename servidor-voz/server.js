@@ -51,11 +51,12 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
     process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
     console.log('Credenciales de Google cargadas y configuradas para todo el entorno.');
 
-    // Inicializamos el cliente de Speech-to-Text directamente con las credenciales parseadas.
-    speechClient = new speech.SpeechClient({ credentials });
+    // Inicializamos el cliente de Speech-to-Text SIN pasarle credenciales.
+    // Ahora las encontrará automáticamente gracias a la variable de entorno, igual que VertexAI.
+    speechClient = new speech.SpeechClient();
   } catch (e) {
     console.error('Error al parsear GOOGLE_APPLICATION_CREDENTIALS_JSON:', e);
-    // Si falla, creamos un cliente sin credenciales para que el servidor no se caiga al arrancar.
+    // Si falla, creamos un cliente sin credenciales para que el servidor no se caiga al arrancar, aunque luego falle.
     speechClient = new speech.SpeechClient();
   }
 }
