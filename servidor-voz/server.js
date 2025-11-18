@@ -51,64 +51,18 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
     process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
     console.log('Credenciales de Google cargadas y configuradas para todo el entorno.');
 
-    // VOLVEMOS AL MÉTODO QUE FUNCIONA PARA SPEECH-TO-TEXT:
-    // Inicializamos el cliente de voz directamente con las credenciales.
-    speechClient = new speech.SpeechClient({ credentials });
+    // Inicializamos el cliente de Speech-to-Text SIN pasarle credenciales.
+    // Ahora las encontrará automáticamente gracias a la variable de entorno.
+    speechClient = new speech.SpeechClient();
   } catch (e) {
     console.error('Error al parsear GOOGLE_APPLICATION_CREDENTIALS_JSON:', e);
     // Si falla, creamos un cliente sin credenciales para que el servidor no se caiga al arrancar, aunque luego falle.
     speechClient = new speech.SpeechClient();
   }
 } else {
-  // Si no hay credenciales, inicializamos un cliente vacío para evitar que el servidor se caiga.
+  // Si no hay credenciales, inicializamos un cliente vacío para evitar que el servidor se caiga al arrancar.
   speechClient = new speech.SpeechClient();
 }
-
-// --- ENDPOINT DE TRANSCRIPCIÓN ---
-
-app.post('/transcribir', async (req, res) => {
-  const audioBytes = req.body.toString('base64');
-
-  if (!speechClient) {
-    return res.status(500).json({ error: 'El cliente de voz no está inicializado.' });
-  }
-
-  if (!audioBytes) {
-    return res.status(400).json({ error: 'No se ha recibido audio.' });
-  }
-
-  const audio = {
-    content: audioBytes,
-  };
-
-  const config = {
-    encoding: 'WEBM_OPUS', // Formato de audio que enviaremos desde el navegador
-    sampleRateHertz: 48000, // Tasa de muestreo estándar
-    languageCode: 'es-ES',
-    model: 'default', // Modelo estándar, muy preciso para dictado
-  };
-
-  const request = {
-    audio: audio,
-    config: config,
-  };
-
-  try {
-    // Enviamos la petición a Google Cloud
-    const [response] = await speechClient.recognize(request);
-    const transcription = response.results
-      .map(result => result.alternatives[0].transcript)
-      .join('\n');
-    
-    console.log(`Transcripción recibida: "${transcription}"`);
-    // Devolvemos el texto transcrito al navegador
-    res.json({ texto: transcription });
-
-  } catch (error) {
-    console.error('ERROR en la API de Google Speech-to-Text:', error);
-    res.status(500).json({ error: 'Error al procesar el audio.' });
-  }
-});
 
 // --- ENDPOINT DE IA (TEMPORALMENTE DESHABILITADO) ---
 app.post('/pregunta-ia', async (req, res) => {
