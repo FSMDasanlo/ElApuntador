@@ -255,6 +255,11 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     // 3. Si no es ni un comando ni una puntuación, ¡es una pregunta para la IA!
     } else {
+      // Añadimos una comprobación para no enviar texto vacío a la IA
+      if (transcripcion.trim() === '') {
+        console.log("Transcripción vacía, no se envía a la IA.");
+        return;
+      }
       // Si no es un comando ni una puntuación, es una pregunta para la IA
       console.log(`Pregunta no reconocida, enviando a la IA: "${transcripcion}"`);
       enviarPreguntaIA(transcripcion);
