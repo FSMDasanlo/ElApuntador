@@ -51,27 +51,17 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
     process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
     console.log('Credenciales de Google cargadas y configuradas para todo el entorno.');
 
-    // Inicializamos el cliente de Speech-to-Text SIN pasarle credenciales.
-    // Ahora las encontrará automáticamente gracias a la variable de entorno, igual que VertexAI.
-    speechClient = new speech.SpeechClient();
+    // VOLVEMOS AL MÉTODO QUE FUNCIONA PARA SPEECH-TO-TEXT:
+    // Inicializamos el cliente de voz directamente con las credenciales.
+    speechClient = new speech.SpeechClient({ credentials });
   } catch (e) {
     console.error('Error al parsear GOOGLE_APPLICATION_CREDENTIALS_JSON:', e);
     // Si falla, creamos un cliente sin credenciales para que el servidor no se caiga al arrancar, aunque luego falle.
     speechClient = new speech.SpeechClient();
   }
-}
-
-// --- CONFIGURACIÓN DE GEMINI (MÉTODO VERTEX AI - CORRECTO PARA SERVIDORES) ---
-let model;
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS) { // Comprobamos si el fichero se creó
-  try {
-    // VertexAI ahora encontrará las credenciales automáticamente gracias a la variable de entorno
-    const vertex_ai = new VertexAI({ project: 'elapuntador', location: 'us-central1' });
-    model = vertex_ai.getGenerativeModel({ model: 'gemini-1.0-pro' });
-    console.log(`Cliente de Gemini (Vertex AI) inicializado en proyecto 'elapuntador'.`);
-  } catch (e) {
-    console.error('Error al inicializar el cliente de Vertex AI (Gemini):', e);
-  }
+} else {
+  // Si no hay credenciales, inicializamos un cliente vacío para evitar que el servidor se caiga.
+  speechClient = new speech.SpeechClient();
 }
 
 // --- ENDPOINT DE TRANSCRIPCIÓN ---
@@ -120,52 +110,10 @@ app.post('/transcribir', async (req, res) => {
   }
 });
 
-// --- ¡NUEVO! ENDPOINT PARA PREGUNTAS A LA IA ---
+// --- ENDPOINT DE IA (TEMPORALMENTE DESHABILITADO) ---
 app.post('/pregunta-ia', async (req, res) => {
-  const { pregunta, estadoJuego } = req.body;
-
-  if (!pregunta || !estadoJuego) {
-    return res.status(400).json({ error: 'Faltan la pregunta o el estado del juego.' });
-  }
-
-  // Creamos el "prompt" para la IA
-  const prompt = `
-    Eres un asistente experto y conciso para un juego de apuntar puntos llamado "El Apuntador".
-    El estado actual del juego es el siguiente (en formato JSON):
-    ${JSON.stringify(estadoJuego, null, 2)}
-
-    El usuario ha preguntado por voz: "${pregunta}"
-
-    Tu tarea es responder a su pregunta de forma breve, clara y directa, como si fueras un apuntador humano. No uses formalidades como "Hola" o "Claro".
-    Por ejemplo, si te preguntan "¿Quién va ganando?", responde "Va ganando [Nombre] con [puntos] puntos".
-    Si te preguntan "¿Cuántos puntos le faltan a Ana para ganar?", responde "A Ana le faltan X puntos".
-  `;
-
-  try {
-    if (!model) {
-      throw new Error("El modelo de IA no se ha inicializado correctamente.");
-    }
-    const result = await model.generateContent(prompt);
-
-    // La forma moderna y segura de obtener la respuesta
-    const response = result.response;
-    if (!response) {
-      throw new Error("La IA no devolvió una respuesta válida.");
-    }
-
-    const text = response.text(); // .text() es una función que extrae el texto
-    console.log(`Respuesta de la IA: "${text}"`);
-    res.json({ respuesta: text });
-  } catch (error) {
-    // Logueamos el error completo para poder depurarlo en Render
-    console.error('ERROR en la API de Gemini:', error);
-    // Devolvemos un mensaje de error más específico si es posible
-    const errorMessage = error.message || 'Error al contactar con la IA.';
-    res.status(500).json({ 
-      error: 'Error en el servidor al procesar la pregunta.',
-      details: errorMessage 
-    });
-  }
+  console.log("El endpoint de IA está temporalmente deshabilitado para estabilizar la transcripción.");
+  res.status(503).json({ respuesta: "Lo siento, la función de preguntas a la inteligencia artificial está en mantenimiento. Prueba a dictar una puntuación." });
 });
 
 // --- ARRANQUE DEL SERVIDOR (MODIFICADO PARA RENDER) ---
