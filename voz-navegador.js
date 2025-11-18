@@ -131,6 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
         audioChunks = [];
         await enviarAudioAlServidor(audioBlob);
+        // ¡CLAVE! Una vez procesado el audio, si el botón de detener sigue visible,
+        // significa que el usuario no lo ha parado manualmente, así que reiniciamos la grabación.
+        if (btnDetenerVoz.style.display !== 'none') {
+          iniciarGrabacion();
+        }
         streamMicrofono.getTracks().forEach(track => track.stop());
       });
 
