@@ -130,13 +130,13 @@ document.addEventListener('DOMContentLoaded', () => {
       mediaRecorder.addEventListener('stop', async () => {
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
         audioChunks = [];
-        await enviarAudioAlServidor(audioBlob);
-        // ¡CLAVE! Una vez procesado el audio, si el botón de detener sigue visible,
-        // significa que el usuario no lo ha parado manualmente, así que reiniciamos la grabación.
-        if (btnDetenerVoz.style.display !== 'none') {
-          iniciarGrabacion();
-        }
+        const transcripcion = await enviarAudioAlServidor(audioBlob);
         streamMicrofono.getTracks().forEach(track => track.stop());
+
+        // ¡CLAVE! Si la transcripción NO está vacía y el usuario no ha parado manualmente, reiniciamos.
+        if (transcripcion && transcripcion.trim() !== '' && btnDetenerVoz.style.display !== 'none') {
+            iniciarGrabacion();
+        }
       });
 
       mediaRecorder.start();
@@ -209,17 +209,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function enviarAudioAlServidor(audioBlob) {
     console.log("Enviando audio al servidor...");
+    let transcripcion = ''; // Valor por defecto en caso de error
     try {
       const response = await fetch(`${URL_SERVIDOR_VOZ}/transcribir`, {
         method: 'POST',
         headers: { 'Content-Type': 'audio/webm' },
         body: audioBlob
       });
-
+  
       if (!response.ok) throw new Error(`Error del servidor: ${response.statusText}`);
-
+  
       const data = await response.json();
-      const transcripcion = data.texto || '';
+      transcripcion = data.texto || '';
       console.log(`Texto reconocido por la IA: "${transcripcion}"`);
       procesarTranscripcion(transcripcion); // Llamamos a la función que decide qué hacer
     } catch (error) {
@@ -227,6 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Hubo un error al contactar con el servicio de voz. Revisa la consola del navegador y del servidor.');
       // Si hay un error, nos aseguramos de detener la grabación para no entrar en bucles.
       detenerGrabacion();
+    } finally {
+        return transcripcion; // Siempre devolvemos la transcripción (o un string vacío)
     }
   }
 
