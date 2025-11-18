@@ -38,17 +38,17 @@ const speechClientConfig = {};
 // Cuando se ejecuta en Render o en local (con .env), esta variable de entorno existirá.
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
   try {
-    // --- ESTRATEGIA DEFINITIVA PARA RENDER ---
-    // 1. Parseamos las credenciales desde la variable de entorno.
+    // --- ESTRATEGIA DEFINITIVA PARA RENDER Y LOCAL ---
+    // Parseamos las credenciales desde la variable de entorno.
     const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-    speechClientConfig.credentials = credentials;
+    speechClientConfig.credentials = credentials; // SpeechClient sí funciona con el objeto
 
-    // 2. Creamos un fichero temporal con las credenciales.
-    // Las librerías de Google Cloud (como VertexAI) lo buscan por defecto.
+    // Creamos un fichero temporal con las credenciales.
+    // Las librerías de Google Cloud (como VertexAI) lo buscan por defecto si la variable de entorno apunta a él.
     const credentialsPath = path.join(__dirname, 'google-credentials.json');
     fs.writeFileSync(credentialsPath, JSON.stringify(credentials));
 
-    // 3. Le decimos al proceso dónde está ese fichero.
+    // Le decimos al proceso dónde está ese fichero. ESTA ES LA CLAVE PARA VERTEX AI.
     process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
     console.log('Credenciales de Google cargadas y configuradas para todo el entorno.');
   } catch (e) {
@@ -60,17 +60,15 @@ const speechClient = new speech.SpeechClient(speechClientConfig);
 
 // --- CONFIGURACIÓN DE GEMINI (MÉTODO VERTEX AI - CORRECTO PARA SERVIDORES) ---
 let model;
-try {
-  const project = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON).project_id;
-  const location = 'europe-west1'; // Usamos una región con alta disponibilidad de modelos
-
-  const vertex_ai = new VertexAI({ project, location });
-
-  // Usamos el nombre de modelo más genérico y compatible para Vertex AI.
-  model = vertex_ai.getGenerativeModel({ model: 'gemini-pro' });
-  console.log(`Cliente de Gemini (Vertex AI) inicializado en proyecto '${project}'.`);
-} catch (e) {
-  console.error('Error al inicializar el cliente de Vertex AI (Gemini):', e);
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS) { // Comprobamos si el fichero se creó
+  try {
+    // VertexAI ahora encontrará las credenciales automáticamente gracias a la variable de entorno
+    const vertex_ai = new VertexAI({ project: 'elapuntador', location: 'us-central1' });
+    model = vertex_ai.getGenerativeModel({ model: 'gemini-1.0-pro' });
+    console.log(`Cliente de Gemini (Vertex AI) inicializado en proyecto 'elapuntador'.`);
+  } catch (e) {
+    console.error('Error al inicializar el cliente de Vertex AI (Gemini):', e);
+  }
 }
 
 // --- ENDPOINT DE TRANSCRIPCIÓN ---
@@ -154,7 +152,12 @@ app.post('/pregunta-ia', async (req, res) => {
   } catch (error) {
     // Logueamos el error completo para poder depurarlo en Render
     console.error('ERROR en la API de Gemini:', error);
-    res.status(500).json({ error: 'Error al contactar con la IA.' });
+    // Devolvemos un mensaje de error más específico si es posible
+    const errorMessage = error.message || 'Error al contactar con la IA.';
+    res.status(500).json({ 
+      error: 'Error en el servidor al procesar la pregunta.',
+      details: errorMessage 
+    });
   }
 });
 
