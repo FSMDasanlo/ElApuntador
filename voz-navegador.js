@@ -130,7 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
       mediaRecorder.addEventListener('stop', async () => {
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
         audioChunks = [];
-        const transcripcion = await enviarAudioAlServidor(audioBlob);
+        await enviarAudioAlServidor(audioBlob);
+        // ¡CLAVE! Una vez procesado el audio, si el botón de detener sigue visible,
+        // significa que el usuario no lo ha parado manualmente, así que reiniciamos la grabación.
+        if (btnDetenerVoz.style.display !== 'none') {
+          iniciarGrabacion();
+        }
         streamMicrofono.getTracks().forEach(track => track.stop());
       });
 
@@ -216,25 +221,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       const transcripcion = data.texto || '';
       console.log(`Texto reconocido por la IA: "${transcripcion}"`);
-      
-      // Procesamos la transcripción aquí mismo
-      procesarTranscripcion(transcripcion);
-
-      // ¡CLAVE! Si la transcripción NO está vacía y el usuario no ha parado manualmente,
-      // reiniciamos la grabación para una conversación fluida.
-      if (transcripcion.trim() !== '' && btnDetenerVoz.style.display !== 'none') {
-        iniciarGrabacion();
-      } else if (transcripcion.trim() === '') {
-        // Si la transcripción está vacía, paramos todo para evitar bucles.
-        console.warn('Transcripción vacía. Deteniendo la voz para evitar bucles.');
-        detenerGrabacion();
-      }
-
-      return transcripcion; // Devolvemos la transcripción
+      procesarTranscripcion(transcripcion); // Llamamos a la función que decide qué hacer
     } catch (error) {
       console.error('Error al enviar/procesar audio:', error);
       alert('Hubo un error al contactar con el servicio de voz. Revisa la consola del navegador y del servidor.');
-      return ''; // Devolvemos vacío en caso de error
+      // Si hay un error, nos aseguramos de detener la grabación para no entrar en bucles.
+      detenerGrabacion();
     }
   }
 
