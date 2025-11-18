@@ -130,12 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
       mediaRecorder.addEventListener('stop', async () => {
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
         audioChunks = [];
-        await enviarAudioAlServidor(audioBlob);
-        // ¡CLAVE! Una vez procesado el audio, si el botón de detener sigue visible,
-        // significa que el usuario no lo ha parado manualmente, así que reiniciamos la grabación.
-        if (btnDetenerVoz.style.display !== 'none') {
-          iniciarGrabacion();
-        }
+        const transcripcion = await enviarAudioAlServidor(audioBlob);
         streamMicrofono.getTracks().forEach(track => track.stop());
       });
 
@@ -208,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
   btnDetenerVoz.addEventListener('click', detenerGrabacion);
 
   async function enviarAudioAlServidor(audioBlob) {
-    console.log("Enviando audio al servidor para transcripción...");
+    console.log("Enviando audio al servidor...");
     try {
       const response = await fetch(`${URL_SERVIDOR_VOZ}/transcribir`, {
         method: 'POST',
@@ -221,16 +216,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       const transcripcion = data.texto || '';
       console.log(`Texto reconocido por la IA: "${transcripcion}"`);
+      
+      // Procesamos la transcripción aquí mismo
+      procesarTranscripcion(transcripcion);
 
-      if (transcripcion) {
-        procesarTranscripcion(transcripcion);
-      } else {
-        console.warn('La IA no devolvió ninguna transcripción.');
+      // ¡CLAVE! Si la transcripción NO está vacía y el usuario no ha parado manualmente,
+      // reiniciamos la grabación para una conversación fluida.
+      if (transcripcion.trim() !== '' && btnDetenerVoz.style.display !== 'none') {
+        iniciarGrabacion();
+      } else if (transcripcion.trim() === '') {
+        // Si la transcripción está vacía, paramos todo para evitar bucles.
+        console.warn('Transcripción vacía. Deteniendo la voz para evitar bucles.');
+        detenerGrabacion();
       }
 
+      return transcripcion; // Devolvemos la transcripción
     } catch (error) {
       console.error('Error al enviar/procesar audio:', error);
       alert('Hubo un error al contactar con el servicio de voz. Revisa la consola del navegador y del servidor.');
+      return ''; // Devolvemos vacío en caso de error
     }
   }
 
