@@ -33,7 +33,7 @@ app.use(express.raw({ type: 'audio/webm', limit: '10mb' }));
 app.use(express.json({ limit: '10mb' })); // Para recibir el JSON con la pregunta y el estado del juego
 
 // --- CONFIGURACIÓN DEL CLIENTE DE GOOGLE (MODIFICADO PARA RENDER) ---
-const speechClientConfig = {};
+let speechClient;
 
 // Cuando se ejecuta en Render o en local (con .env), esta variable de entorno existirá.
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
@@ -41,7 +41,6 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
     // --- ESTRATEGIA DEFINITIVA PARA RENDER Y LOCAL ---
     // Parseamos las credenciales desde la variable de entorno.
     const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-    speechClientConfig.credentials = credentials; // SpeechClient sí funciona con el objeto
 
     // Creamos un fichero temporal con las credenciales.
     // Las librerías de Google Cloud (como VertexAI) lo buscan por defecto si la variable de entorno apunta a él.
@@ -51,12 +50,15 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
     // Le decimos al proceso dónde está ese fichero. ESTA ES LA CLAVE PARA VERTEX AI.
     process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
     console.log('Credenciales de Google cargadas y configuradas para todo el entorno.');
+
+    // Inicializamos el cliente de Speech-to-Text directamente con las credenciales parseadas.
+    speechClient = new speech.SpeechClient({ credentials });
   } catch (e) {
     console.error('Error al parsear GOOGLE_APPLICATION_CREDENTIALS_JSON:', e);
+    // Si falla, creamos un cliente sin credenciales para que el servidor no se caiga al arrancar.
+    speechClient = new speech.SpeechClient();
   }
 }
-
-const speechClient = new speech.SpeechClient(speechClientConfig);
 
 // --- CONFIGURACIÓN DE GEMINI (MÉTODO VERTEX AI - CORRECTO PARA SERVIDORES) ---
 let model;
@@ -75,6 +77,10 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS) { // Comprobamos si el fichero s
 
 app.post('/transcribir', async (req, res) => {
   const audioBytes = req.body.toString('base64');
+
+  if (!speechClient) {
+    return res.status(500).json({ error: 'El cliente de voz no está inicializado.' });
+  }
 
   if (!audioBytes) {
     return res.status(400).json({ error: 'No se ha recibido audio.' });
