@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Apuntador - El Avaricioso</title>
+  <link rel="stylesheet" href="style_avaricioso.css">
+  <script src="../jugadores.js" defer></script>
+  <script src="dadosavaricioso.js" defer></script>
+  <script src="../voz-navegador.js" defer></script>
+  <script src="../componentes-comunes.js" defer></script>
+</head>
+<body class="juego">
+
+<div class="cabecera-juego">
+  <header class="header-juego">
+    <div class="titulo">
+      <h1 id="nombre-juego">
+        <span id="texto-titulo-juego">EL AVARICIOSO</span>
+        <button id="btn-ayuda" class="btn-help" title="Ver reglamento">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+            <circle cx="12" cy="12" r="10" fill="none"/>
+            <text x="12" y="17" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold" stroke="none">i</text>
+          </svg>
+        </button>
+      </h1>
+    </div>
+  </header>
+
+  <div class="botones-superiores">
+      <button class="btn-accion" onclick="location.href='../juegos.html'">← A Juegos</button>
+      <button class="btn-accion" onclick="location.href='../gestion_jugadores.html'">Nombres</button>
+      <button class="btn-accion" onclick="limpiarPuntuaciones()">Limpiar</button>
+      <div class="grupo-voz">
+        <button id="btn-voz">🎤 Iniciar voz</button>
+        <button id="btn-voz-ayuda" title="Ver comandos de voz" class="btn-help" style="background-color: #f1c40f;">i</button>
+      </div>
+      <button id="btn-detener-voz" class="btn-accion" style="display:none; background-color: #e74c3c;">🛑 Detener voz</button>
+  </div>
+</div>
+
+<hr class="separador">
+
+<div class="opciones-juego">
+  <label for="meta-puntos">Meta de Puntos:</label>
+  <input type="number" id="meta-puntos" value="5000" min="100" step="100">
+</div>
+
+<main class="marcador">
+  <div class="tabla">
+    <table id="tabla-puntos">
+      <thead>
+        <tr id="fila-totales"></tr>
+        <tr id="fila-ranking"></tr>
+        <tr id="fila-nombres"></tr>
+      </thead>
+      <tbody id="cuerpo-tabla"></tbody>
+    </table>
+  </div>
+  <button id="btn-add-row" title="Añadir fila nueva">+</button>
+</main>
+
+<!-- Modal de ayuda del Reglamento -->
+<div id="modal-ayuda" class="modal">
+  <div class="modal-contenido">
+    <span class="cerrar">&times;</span>
+    <h2>Reglas de El Avaricioso</h2>
+    <p>El objetivo es ser el primer jugador en alcanzar o superar la meta de puntos (normalmente 5000).</p>
+    <h4>Cómo Jugar:</h4>
+    <ul>
+      <li>En tu turno, lanzas 6 dados.</li>
+      <li>Debes apartar al menos un dado que puntúe en cada tirada. Puedes apartar más.</li>
+      <li>Puedes plantarte y sumar los puntos de los dados apartados, o puedes volver a tirar los dados restantes para intentar sumar más puntos.</li>
+      <li>Si en una tirada no sacas ningún dado que puntúe, pierdes todos los puntos acumulados <strong>en ese turno</strong> y pasas el turno al siguiente jugador.</li>
+      <li>Si consigues puntuar con los 6 dados, puedes volver a tirar los 6 y seguir acumulando puntos en el mismo turno.</li>
+    </ul>
+    <h4>Puntuación:</h4>
+    <ul>
+      <li><strong>1:</strong> 100 puntos.</li>
+      <li><strong>5:</strong> 50 puntos.</li>
+      <li><strong>Tres 1:</strong> 1000 puntos.</li>
+      <li><strong>Tres 2, 3, 4, 5 o 6:</strong> El número del dado x 100 (ej: tres 4s son 400 puntos).</li>
+      <li><strong>Escalera (1-2-3-4-5-6):</strong> 1500 puntos.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // La lógica del modal de voz ya está en componentes-comunes.js
+
+    // Lógica para el modal de ayuda del reglamento
+    const modalAyuda = document.getElementById("modal-ayuda");
+    const btnAyuda = document.getElementById("btn-ayuda");
+    const cerrarAyuda = modalAyuda.querySelector(".cerrar");
+
+    if (btnAyuda && modalAyuda && cerrarAyuda) {
+      btnAyuda.addEventListener("click", () => { modalAyuda.style.display = "block"; });
+      cerrarAyuda.addEventListener("click", () => { modalAyuda.style.display = "none"; });
+      window.addEventListener("click", (e) => {
+        if (e.target === modalAyuda) modalAyuda.style.display = "none";
+      });
+    }
+  });
+</script>
+
+</body>
+</html>
