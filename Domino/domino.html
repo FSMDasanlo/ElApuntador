@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Apuntador - Dominó</title>
+  <link rel="stylesheet" href="style_domino.css">
+  <script src="../jugadores.js" defer></script>
+  <script src="domino.js" defer></script>
+  <script src="../voz-navegador.js" defer></script>
+  <script src="../componentes-comunes.js" defer></script>
+</head>
+<body class="juego">
+
+<div class="cabecera-juego">
+  <header class="header-juego">
+    <div class="titulo">
+      <h1 id="nombre-juego">
+        <span id="texto-titulo-juego">DOMINÓ</span>
+        <button id="btn-ayuda" class="btn-help" title="Ver reglamento">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+            <circle cx="12" cy="12" r="10" fill="none"/>
+            <text x="12" y="17" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold" stroke="none">i</text>
+          </svg>
+        </button>
+      </h1>
+    </div>
+  </header>
+
+  <div class="botones-superiores">
+      <button class="btn-accion" onclick="location.href='../juegos.html'">← A Juegos</button>
+      <button class="btn-accion" onclick="location.href='../gestion_jugadores.html'">Nombres</button>
+      <button class="btn-accion" onclick="limpiarPuntuaciones()">Limpiar</button>
+      <div class="grupo-voz">
+        <button id="btn-voz">🎤 Iniciar voz</button>
+        <button id="btn-voz-ayuda" title="Ver comandos de voz" class="btn-help" style="background-color: #f1c40f;">i</button>
+      </div>
+      <button id="btn-detener-voz" class="btn-accion" style="display:none; background-color: #e74c3c;">🛑 Detener voz</button>
+  </div>
+</div>
+
+<hr class="separador">
+
+<!-- ¡REVERTIDO! Contenedor para las opciones del juego -->
+<div class="opciones-juego"> <!-- ¡NUEVO! Estructura simplificada -->
+  <label>Modo:</label>
+  <button id="btn-individual" class="btn-opcion active" title="El que llega al límite de puntos, pierde.">Individual</button>
+  <button id="btn-parejas" class="btn-opcion" title="La pareja que llega al límite de puntos, pierde.">Parejas</button>
+  <label for="limite-puntos">Puntos:</label>
+  <input type="number" id="limite-puntos" value="100" min="1">
+</div>
+
+  <main class="marcador">
+    <div class="tabla">
+      <table id="tabla-puntos">
+        <thead>
+          <tr id="fila-totales">
+            <!-- Se llena con JS -->
+          </tr>
+          <tr id="fila-ranking">
+            <!-- ¡NUEVO! Fila para los números de orden -->
+          </tr>
+          <tr id="fila-nombres">
+            <!-- Se llena con JS -->
+          </tr>
+        </thead>
+        <tbody id="cuerpo-tabla">
+          <!-- Se llena con JS -->
+        </tbody>
+      </table>
+    </div>
+    <button id="btn-add-row" title="añadir fila nueva">+</button>
+  </main>
+
+</div>
+
+<!-- Modal de ayuda del Reglamento (copiado de domino_old.html) -->
+<div id="modal-ayuda" class="modal">
+  <div class="modal-contenido">
+    <span class="cerrar">&times;</span>
+    <h2>Instrucciones del Dominó</h2>
+    <p>El objetivo del dominó es colocar todas tus fichas en la mesa antes que los contrarios y sumar los puntos acordados para ganar la partida.</p>
+    <p><strong>Reglas del dominó:</strong></p>
+    <ul>
+      <li>Cada jugador recibe 7 fichas. Lo normal es jugar por parejas, así que se reparten las 28 fichas (7x4).</li>
+      <li>En la primera ronda comienza el jugador que tenga el 6 doble. Si hay menos de 4 jugadores, también se reparten 7 fichas por jugador y las restantes, se meten en el pozo.</li>
+      <li>Comienza la partida quien tenga el doble más alto, si nadie tuviera pues quien tenga la ficha más alta.</li>
+      <li>A partir de ahí cada jugador juega su turno en orden a las manecillas del reloj.</li>
+      <li>En su turno cada jugador pone ficha en uno de los extremos abiertos si tiene ficha del mismo número. No puede pasar si tiene ficha para poner. Los dobles se ponen de forma transversal.</li>
+      <li>Si no puedes poner, o pasas (no quedan fichas en el pozo) o robas en el caso de que hubiera fichas en el pozo hasta que cojas una ficha que puedas poner, o se acaben las fichas.</li>
+      <li>La ronda se termina cuando un jugador coloca todas sus fichas, o cuando se cierran los extremos, es decir, que nadie puede colocar en ningún extremo.</li>
+      <li>En el primer caso, se suman todos los puntos que tienen el resto de jugadores en las fichas que no se han puesto.</li>
+      <li>En el segundo caso (se cierra), se suma de manera habitual. Si es en pareja, se suman los puntos por parejas. Quien menos puntos tenga en su mano gana la ronda.</li>
+      <li>La siguiente ronda la comenzará el jugador a la derecha del que comenzó la ronda anterior. Así hasta que alguno de los jugadores o pareja, llegue a la puntuación acordada.</li>
+      <li>Es mano el jugador que pone la primera ficha en cada ronda. En caso de igualdad de puntos, gana la mano.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // La lógica del modal de voz se ha movido a 'componentes-comunes.js'.
+    // El listener para cerrar el modal de reglamento al hacer clic fuera
+    // también se ha unificado.
+
+    // Lógica para el modal de ayuda del reglamento (copiado de domino_old.html)
+    const modalAyuda = document.getElementById("modal-ayuda");
+    const btnAyuda = document.getElementById("btn-ayuda");
+    const cerrarAyuda = modalAyuda.querySelector(".cerrar");
+
+    if (btnAyuda && modalAyuda && cerrarAyuda) {
+      btnAyuda.addEventListener("click", () => { modalAyuda.style.display = "block"; });
+      cerrarAyuda.addEventListener("click", () => { modalAyuda.style.display = "none"; });
+      // El listener para cerrar al hacer clic fuera ahora es global en componentes-comunes.js
+      // pero lo dejamos aquí también para el modal de reglas.
+      window.addEventListener("click", (e) => { if (e.target === modalAyuda) modalAyuda.style.display = "none"; });
+    }
+  });
+</script>
+
+</body>
+</html>
