@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Apuntador - Continental</title>
+ 
+  <link rel="stylesheet" href="continental.css"> 
+  <script src="../jugadores.js" defer></script>
+  <script src="continental.js" defer></script>
+  <script src="../voz-navegador.js" defer></script>
+  <script src="../componentes-comunes.js" defer></script>
+
+  <script>
+  </script>
+  <!-- ¡SOLUCIÓN! Añadimos los estilos del botón de ayuda directamente aquí -->
+  <style>
+    .btn-help {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background-color: #4a90e2;
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      transition: transform 0.2s, background-color 0.2s;
+      margin-left: 10px;
+    }
+
+    .btn-help:hover {
+      background-color: #357ab8;
+      transform: scale(1.1);
+    }
+
+    .btn-help svg {
+      width: 20px;
+      height: 20px;
+    }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+    .modal-contenido { background-color: #fff; margin: 10% auto; padding: 1.5rem; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .modal-contenido h2 { color: #4a90e2; margin-bottom: 1rem; }
+    .cerrar, .cerrar-voz { color: #aaa; float: right; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
+  </style>
+</head>
+<body class="juego">
+<!-- NUEVO CONTENEDOR PARA LA CABECERA -->
+<div class="cabecera-juego">
+  <div class="header-juego">
+    <h1 id="nombre-juego">
+      <!-- ¡SOLUCIÓN! Replicamos la estructura del Avaricioso para que el JS no borre el botón -->
+      <span id="texto-titulo-juego">CONTINENTAL</span>
+      <button id="btn-ayuda" class="btn-help" title="Ver reglamento">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+          <circle cx="12" cy="12" r="10" fill="none"/>
+          <text x="12" y="17" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold" stroke="none">i</text>
+        </svg>
+      </button>
+    </h1>
+  </div>
+
+  <div class="botones-superiores">
+    <button onclick="location.href='../juegos.html'">Volver a juegos</button>
+    <button onclick="location.href='../gestion_jugadores.html'">Gestión de nombres</button>
+    <button onclick="limpiarPuntuaciones()">Limpiar puntuación</button>
+    <div class="grupo-voz">
+      <button id="btn-voz">🎤 Iniciar voz</button>
+      <button id="btn-voz-ayuda" title="Ver comandos de voz" class="btn-help" style="background-color: #f1c40f;">i</button>
+    </div>
+    <button id="btn-detener-voz" style="display:none; background-color: #e74c3c;">🛑 Detener voz</button>
+  </div>
+</div>
+
+<hr class="separador">
+
+<div class="contenedor-principal"> 
+  
+  <main class="marcador">
+    <div class="tabla">
+      <table id="tabla-puntos">
+        <thead>
+          <tr>
+            <th rowspan="2" class="col-jugador">Jugador</th>
+            <th>7 Cartas</th>
+            <th>8 Cartas</th>
+            <th>9 Cartas</th>
+            <th>10 Cartas</th>
+            <th>11 Cartas</th>
+            <th>12 Cartas</th>
+            <th>13 Cartas</th>
+            <th rowspan="2" class="col-total">Total</th>
+          </tr>
+          <tr>
+            <th>Dos tríos</th><th>Un trío y una escalera</th><th>Dos escaleras</th><th>Tres tríos</th><th>Dos tríos y una escalera</th><th>Un trío y dos escaleras</th><th>Tres escaleras</th>
+          </tr>
+        </thead>
+        <tbody>
+          </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- Modal para la ayuda del reglamento (¡NUEVO!) -->
+<div id="modal-reglamento" class="modal">
+  <div class="modal-contenido">
+    <span class="cerrar">&times;</span>
+    <h2>Reglas del Continental</h2>
+    <p><strong>Objetivo:</strong> Ser el jugador con <strong>menos puntos</strong> al final de las 7 rondas.</p>
+    
+    <h4>Puntuación de Cartas (al quedarse en mano)</h4>
+    <ul>
+      <li><strong>Comodín (Joker):</strong> 50 puntos.</li>
+      <li><strong>As:</strong> 20 puntos.</li>
+      <li><strong>Figuras (K, Q, J):</strong> 10 puntos.</li>
+      <li><strong>Del 2 al 10:</strong> Su valor nominal.</li>
+    </ul>
+
+    <h4>Bonificaciones por Cierre</h4>
+    <ul>
+      <li><strong>-50 puntos:</strong> Si un jugador "baja" y cierra en el mismo turno (sin haber bajado antes).</li>
+      <li><strong>-20 puntos:</strong> Si un jugador cierra en un turno posterior al que bajó.</li>
+    </ul>
+
+    <h4>Combinaciones por Ronda</h4>
+    <ol>
+      <li><b>7 Cartas:</b> Dos tríos.</li>
+      <li><b>8 Cartas:</b> Un trío y una escalera.</li>
+      <li><b>9 Cartas:</b> Dos escaleras.</li>
+      <li><b>10 Cartas:</b> Tres tríos.</li>
+      <li><b>11 Cartas:</b> Dos tríos y una escalera.</li>
+      <li><b>12 Cartas:</b> Un trío y dos escaleras.</li>
+      <li><b>13 Cartas:</b> Tres escaleras.</li>
+    </ol>
+    <p>Un <strong>trío</strong> son 3 cartas del mismo número. Una <strong>escalera</strong> son 4 o más cartas consecutivas del mismo palo. El <strong>As</strong> es un comodín de posición en las escaleras (puede ir al principio, al final o en medio, como en K-As-2). Se pueden formar varias escaleras del mismo palo.</p>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // La lógica del modal de voz se ha movido a 'componentes-comunes.js'
+    // Solo dejamos aquí la lógica específica de esta página.
+
+    // Lógica para el modal de REGLAMENTO
+    const modalReglamento = document.getElementById("modal-reglamento");
+    const btnAyuda = document.getElementById("btn-ayuda");
+    const cerrarReglamento = modalReglamento.querySelector(".cerrar");
+
+    if (btnAyuda) {
+      btnAyuda.addEventListener("click", () => { modalReglamento.style.display = "block"; });
+      cerrarReglamento.addEventListener("click", () => { modalReglamento.style.display = "none"; });
+    }
+
+    // Cerrar modal de reglamento al hacer clic fuera
+    window.addEventListener("click", (e) => { 
+      if (e.target === modalReglamento) modalReglamento.style.display = "none";
+    });
+  });
+</script>
+</body>
+</html>
