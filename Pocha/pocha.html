@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La Pocha</title>
+  <link rel="stylesheet" href="stylepocha.css">
+  <script src="pocha.js" defer></script>
+  <script src="../jugadores.js" defer></script>
+  <script src="../voz-navegador.js" defer></script>
+  <script src="../componentes-comunes.js" defer></script>
+
+</head>
+
+<body class="juego">
+  <header>
+    <div class="header-content">
+      <div class="header-juego"> <!-- Contenedor para título y botón de ayuda -->
+        <h1 id="nombre-juego">LA POCHA</h1>
+        <button id="btn-ayuda" title="Ver instrucciones" class="btn-help">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+            <circle cx="12" cy="12" r="10" fill="none"></circle>
+            <text x="12" y="17" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold" stroke="none">i</text>
+          </svg>
+        </button>
+      </div>
+      <div class="botones-superiores">
+        <button onclick="window.location.href='../juegos.html'">Volver a juegos</button>
+        <button onclick="window.location.href='../gestion_jugadores.html'">Gestión de nombres</button>
+        <button onclick="limpiarPuntuaciones()">Limpiar puntuación</button>
+        <div class="grupo-voz">
+          <button id="btn-voz">🎤 Iniciar voz</button>   
+          <button id="btn-voz-ayuda" title="Ver comandos de voz" class="btn-help btn-help-voz" style="background-color: #f1c40f;">i</button>
+      </div>
+        <button id="btn-detener-voz" style="display:none; background-color: #e74c3c;">🛑 Detener voz</button>
+      </div>
+    </div>
+  </header>
+  
+  <main class="marcador">
+    <div id="tablas-rondas-wrapper">
+      <div id="tablas-rondas">
+          
+          <div class="tabla-ronda" id="contenedor-ascendente">
+               <h3>Rondas Ascendentes (1 → Max)</h3>
+               <table id="tabla-puntos-ascendente">
+                  <thead></thead>
+                  <tbody id="cuerpo-tabla-ascendente"></tbody>
+               </table>
+          </div>
+
+          <div class="tabla-ronda" id="contenedor-descendente">
+               <h3>Rondas Descendentes (Max → 1)</h3>
+               <table id="tabla-puntos-descendente">
+                  <thead></thead>
+                  <tbody id="cuerpo-tabla-descendente"></tbody>
+               </table>
+          </div>
+          
+      </div>
+    </div>
+  </main>
+
+ <div id="modal-ayuda" class="modal">
+    <div class="modal-contenido">
+      <span class="cerrar">&times;</span>
+      <h2>Instrucciones</h2>
+      <p>La pocha es un juego de cartas en el que el objetivo es acertar el número exacto de bazas que se ganarán en cada mano.</p>
+      <p>Se juega con una baraja española. Se reparten cartas de forma ascendente hasta el máximo, y luego descendente. Ganas puntos si aciertas tu predicción.</p>
+      <ul>
+        <li><strong>Objetivo:</strong> acertar las bazas que ganarás.</li>
+        <li><strong>Puntuación:</strong> aciertas = 10 + 5×bazas; fallas = –5×diferencia.</li>
+        <li><strong>Final:</strong> gana quien tenga más puntos al final del ciclo.</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // La lógica del modal de voz se ha movido a 'componentes-comunes.js'
+    // Solo dejamos aquí la lógica específica del modal de reglamento.
+    const modal = document.getElementById("modal-ayuda");
+    const btnAyuda = document.getElementById("btn-ayuda");
+    const cerrar = document.querySelector(".cerrar");
+    btnAyuda.addEventListener("click", () => { modal.style.display = "block"; });
+    cerrar.addEventListener("click", () => { modal.style.display = "none"; });
+    window.addEventListener("click", (e) => { if(e.target===modal){ modal.style.display="none"; } });
+  </script>
+</body>
+</html>
