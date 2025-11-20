@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Apuntador - Carrera de Dados</title>
+  <link rel="stylesheet" href="style_dadospuntos.css">
+  <script src="../jugadores.js" defer></script>
+  <script src="dadospuntos.js" defer></script>
+  <script src="../voz-navegador.js" defer></script>
+  <script src="../componentes-comunes.js" defer></script>
+</head>
+<body class="juego">
+
+<div class="cabecera-juego">
+  <header class="header-juego">
+    <div class="titulo">
+      <h1 id="nombre-juego">
+        <span id="texto-titulo-juego">CARRERA DE DADOS</span>
+        <button id="btn-ayuda" class="btn-help" title="Ver reglamento">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+            <circle cx="12" cy="12" r="10" fill="none"/>
+            <text x="12" y="17" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold" stroke="none">i</text>
+          </svg>
+        </button>
+      </h1>
+    </div>
+  </header>
+
+  <div class="botones-superiores">
+      <button class="btn-accion" onclick="location.href='../juegos.html'">← A Juegos</button>
+      <button class="btn-accion" onclick="location.href='../gestion_jugadores.html'">Nombres</button>
+      <button class="btn-accion" onclick="limpiarPuntuaciones()">Limpiar</button>
+      <div class="grupo-voz">
+        <button id="btn-voz">🎤 Iniciar voz</button>
+        <button id="btn-voz-ayuda" title="Ver comandos de voz" class="btn-help" style="background-color: #f1c40f;">i</button>
+      </div>
+      <button id="btn-detener-voz" class="btn-accion" style="display:none; background-color: #e74c3c;">🛑 Detener voz</button>
+  </div>
+</div>
+
+<hr class="separador">
+
+<main class="marcador">
+  <div id="tablas-rondas-wrapper">
+    <div id="tablas-rondas">
+        <div class="tabla-ronda" id="contenedor-ascendente">
+             <h3>Ronda Libre (puedes repetir categoría)</h3>
+             <table id="tabla-puntos-ascendente">
+                <thead></thead>
+                <tbody id="cuerpo-tabla-ascendente"></tbody>
+             </table>
+        </div>
+
+        <div class="tabla-ronda" id="contenedor-descendente">
+             <h3>Ronda Obligada (una vez por categoría)</h3>
+             <table id="tabla-puntos-descendente">
+                <thead></thead>
+                <tbody id="cuerpo-tabla-descendente"></tbody>
+             </table>
+        </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal de ayuda del Reglamento -->
+<div id="modal-ayuda" class="modal">
+  <div class="modal-contenido">
+    <span class="cerrar">&times;</span>
+    <h2>Reglas de Carrera de Dados</h2>
+    <p>El objetivo es conseguir la máxima puntuación posible a lo largo de 12 rondas, usando 6 dados de póker.</p>
+    <h4>Cómo Jugar:</h4>
+    <ul>
+      <li>En cada turno, tienes hasta 3 lanzamientos para conseguir la mejor combinación posible para una de las categorías.</li>
+      <li>Después de cada lanzamiento, puedes apartar los dados que te interesen y volver a lanzar los demás.</li>
+      <li>Al final de tus lanzamientos, anotas los puntos en una de las casillas. La puntuación debe ser un múltiplo del valor de la categoría.</li>
+    </ul>
+    <h4>Puntuación:</h4>
+    <ul>
+      <li><strong>Negros (N):</strong> 1 punto por cada dado negro.</li>
+      <li><strong>Rojos (R):</strong> 2 puntos por cada dado rojo.</li>
+      <li><strong>Jotas (J):</strong> 3 puntos por cada Jota.</li>
+      <li><strong>Reinas (Q):</strong> 4 puntos por cada Reina.</li>
+      <li><strong>Reyes (K):</strong> 5 puntos por cada Rey.</li>
+      <li><strong>Ases (AS):</strong> 6 puntos por cada As.</li>
+    </ul>
+    <h4>Rondas:</h4>
+    <p>El juego tiene dos fases: una <strong>Ronda Libre</strong> de 6 turnos donde puedes puntuar en la categoría que quieras (incluso repetir), y una <strong>Ronda Obligada</strong> donde debes puntuar una vez en cada una de las 6 categorías.</p>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Lógica para el modal de ayuda del reglamento
+    const modalAyuda = document.getElementById("modal-ayuda");
+    const btnAyuda = document.getElementById("btn-ayuda");
+    const cerrarAyuda = modalAyuda.querySelector(".cerrar");
+
+    if (btnAyuda && modalAyuda && cerrarAyuda) {
+      btnAyuda.addEventListener("click", () => { modalAyuda.style.display = "block"; });
+      cerrarAyuda.addEventListener("click", () => { modalAyuda.style.display = "none"; });
+      window.addEventListener("click", (e) => {
+        if (e.target === modalAyuda) modalAyuda.style.display = "none";
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

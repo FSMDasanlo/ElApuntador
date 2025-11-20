@@ -1,0 +1,238 @@
+/*
+ * style_dadospuntos.css
+ * Estilos específicos para el juego "Carrera de Dados", basados en style_avaricioso.css.
+ */
+
+/* ======================================================= */
+/* ===== LAYOUT GENERAL Y CENTRADO ======================= */
+/* ======================================================= */
+
+body.juego {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
+  margin: 0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Contenedor principal para el header y la tabla */
+.contenedor-juego {
+  width: 100%;
+  max-width: 1200px; /* Ancho máximo para todo el contenido */
+}
+
+/* ======================================================= */
+/* ===== HEADER Y BOTONES ================================ */
+/* ======================================================= */
+
+/* Estructura de cabecera común a todos los juegos */
+.cabecera-juego {
+  width: 100%;
+  max-width: 600px; /* <-- 1. CABECERA MÁS ESTRECHA */
+  background: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+
+.header-juego { text-align: center; }
+.header-juego h1 { font-size: 2rem; font-weight: 700; color: #4a90e2; margin: 0; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+.botones-superiores {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.btn-accion, #btn-voz, #btn-detener-voz {
+  padding: 0.7rem 1.2rem;
+  border-radius: 10px;
+  border: none;
+  background: #4a90e2;
+  color: white;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btn-accion:hover, #btn-voz:hover, #btn-detener-voz:hover {
+  background: #357ab8;
+  transform: translateY(-2px);
+}
+
+.separador {
+  width: 100%;
+  max-width: 1200px;
+  border: none;
+  border-top: 1px solid #ddd;
+  margin-bottom: 1rem;
+}
+
+/* ======================================================= */
+/* ===== TABLA Y RANKING ================================= */
+/* ======================================================= */
+
+main.marcador {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.tabla {
+  width: 100%;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  padding: 1rem;
+}
+
+/* <-- 2. ESTILOS DE TABLA APLICADOS (COMO EN POCHA) */
+#tabla-puntos-ascendente,
+#tabla-puntos-descendente {
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden; /* Para que el borde redondeado afecte a las celdas */
+}
+
+#tabla-puntos-ascendente th, #tabla-puntos-ascendente td,
+#tabla-puntos-descendente th, #tabla-puntos-descendente td {
+  border: 1px solid #e0e0e0;
+  padding: 0.4rem 0.5rem; /* <-- 1. ALTURA DE FILA REDUCIDA */
+  text-align: center;
+  min-width: 60px;
+}
+
+#tabla-puntos-ascendente th,
+#tabla-puntos-descendente th {
+  background: #4a90e2;
+  color: white;
+  font-weight: 600;
+}
+
+#tabla-puntos-ascendente td[contenteditable="true"],
+#tabla-puntos-descendente td[contenteditable="true"] {
+  background: #f9f9f9;
+  text-align: center; /* <-- ¡AHORA SÍ! Centramos el texto en la celda. */
+  direction: ltr; /* 2. SOLUCIÓN ESCRITURA INVERSA: Forzamos la dirección del texto */
+  cursor: text;
+  transition: background 0.2s;
+}
+
+#tabla-puntos-ascendente td[contenteditable="true"]:focus,
+#tabla-puntos-descendente td[contenteditable="true"]:focus {
+  outline: 2px solid #4a90e2;
+  background: #ffffff;
+  box-shadow: inset 0 0 5px rgba(74, 144, 226, 0.5);
+}
+
+/* <-- 2. ESTILOS PARA EL RANKING JUNTO AL NOMBRE --> */
+.nombre-jugador {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* <-- CAMBIO: Alinea a la izquierda */
+  gap: 8px;
+}
+
+.rank-prefix-col {
+  display: inline-block;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.rank-prefix-col.top1 { background-color: #50c878; } /* Verde para el 1º */
+.rank-prefix-col.top2 { background-color: #f5d142; } /* Amarillo para el 2º */
+.rank-prefix-col.top3 { background-color: #ff7f50; } /* Naranja para el 3º */
+
+/* Estilo para la celda de total */
+.total {
+  font-weight: bold;
+  background-color: #e9ecef;
+}
+
+
+.ranking {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1rem;
+  width: 100%;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ranking h3 { margin-bottom:0.5rem; font-size:1.2rem; color:#4a90e2; }
+.ranking ol { list-style-position: inside; padding-left: 0; }
+.ranking li { margin-bottom: 0.3rem; padding: 0.3rem 0.5rem; border-radius: 6px; font-weight: 500; color: white; }
+.ranking li:nth-child(1) { background: #50c878; }
+.ranking li:nth-child(2) { background: #f5d142; }
+.ranking li:nth-child(3) { background: #ff7f50; }
+
+/* Contenedores de las tablas */
+#tablas-rondas-wrapper {
+  width: 100%;
+  overflow-x: auto; /* Permite scroll horizontal si las tablas son muy anchas */
+}
+
+#tablas-rondas {
+  display: flex;
+  flex-direction: column; /* <-- CAMBIO: Apila las tablas verticalmente */
+  align-items: center;    /* <-- CAMBIO: Centra las tablas en el contenedor */
+  gap: 1.5rem;
+  justify-content: flex-start;
+}
+
+.tabla-ronda h3 { text-align: center; color: #333; font-weight: 600; }
+
+/* Estilo para celdas con error */
+.error-multiplo {
+  background-color: #ffdddd !important;
+  color: #d8000c;
+}
+
+/* ======================================================= */
+/* ===== MODALES Y BOTONES DE AYUDA ====================== */
+/* ======================================================= */
+
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+.modal-contenido { background-color: #fff; margin: 10% auto; padding: 1.5rem; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.modal-contenido h2 { color: #4a90e2; margin-bottom: 1rem; }
+.cerrar, .cerrar-voz { color: #aaa; float: right; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
+.cerrar:hover, .cerrar-voz:hover { color: #000; }
+
+.btn-help { 
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center; 
+  width: 36px; height: 36px; 
+  background-color: #4a90e2; /* <-- CAMBIO: Añadido color de fondo azul */
+  color: white; font-weight: bold; font-size: 1.2rem; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.2s, background-color 0.2s; 
+}
+.btn-help:hover { transform: scale(1.1); }
+.grupo-voz { display: inline-flex; align-items: center; gap: 0.5rem; }
+
+/* ======================================================= */
+/* ===== RESPONSIVE ====================================== */
+/* ======================================================= */
+
+@media (max-width: 700px) {
+  .botones-superiores { flex-direction: column; align-items: center; }
+  .header-juego h1 { font-size: 1.6rem; }
+  .tabla { padding: 0.5rem; }
+}
