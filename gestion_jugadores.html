@@ -4,32 +4,195 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestión de jugadores - El Apuntador</title>
-  <link rel="stylesheet" href="style.css">
   <script src="jugadores.js" defer></script>
+  <style>
+    /* Estilos específicos para la página de gestión de jugadores */
+    body.gestion {
+      background: #f0f4f8; /* Fondo blanco-azulado muy suave */
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    /* Nuevo contenedor para la cabecera */
+    .header-container {
+      /* Estilos para la imagen de fondo que se añadirá con JS */
+      background-size: cover;
+      background-position: center;
+      position: relative; /* Necesario para el pseudo-elemento overlay */
+
+      border-radius: 12px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      /* Quitamos el efecto de cristal que no se aprecia con la imagen */
+      /* backdrop-filter: blur(4px); */
+      /* -webkit-backdrop-filter: blur(4px); */
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 500px;
+      padding: 1rem 2rem;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    /* Overlay oscuro para mejorar la legibilidad del texto sobre la imagen */
+    .header-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5); /* Overlay negro semitransparente */
+      border-radius: 12px; /* Para que coincida con el contenedor */
+      z-index: 1;
+    }
+    /* Hacemos que el contenido (h1, button) esté por encima del overlay */
+    .header-container > * { position: relative; z-index: 2; }
+
+    .contenedor-gestion {
+      margin-top: 1rem; /* Añadimos separación con la cabecera */
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); /* Sombra restaurada */
+      backdrop-filter: blur(4px); /* Propiedad estándar restaurada */
+      -webkit-backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      width: 100%;
+      max-width: 500px;
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+
+    .lista-jugadores li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: transparent; /* Sin fondo */
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e0e0e0; /* Borde inferior para separar */
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+      /* Eliminamos la sombra y el borde redondeado */
+    }
+
+    .lista-jugadores li span {
+      flex-grow: 1;
+      outline: none;
+    }
+
+    .lista-jugadores li span:focus {
+      background-color: #fff;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    /* Botón de eliminar jugador (X) más sutil */
+    .borrar-jugador {
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 0 0.5rem;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .borrar-jugador:hover {
+      color: #d9534f; /* Rojo al pasar el ratón */
+    }
+
+    /* --- Contenedor de input y botones de acción --- */
+    .agregar-jugador {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .agregar-jugador input {
+      flex-grow: 1; /* Ocupa el espacio disponible */
+      padding: 0.7rem; /* Hacemos el input más grande */
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    /* --- Estilos para los botones restaurados --- */
+    .agregar-jugador .btn-accion {
+      padding: 0.7rem; /* Mismo padding que el input para alinear altura */
+      font-size: 1.2rem; /* Icono más grande */
+      line-height: 1;
+      border-radius: 6px;
+      border: none;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .agregar-jugador .btn-add {
+      background-color: #4CAF50; /* Verde */
+    }
+    .agregar-jugador .btn-add:hover { background-color: #45a049; }
+
+    .agregar-jugador .btn-clear-list {
+      background-color: #f44336; /* Rojo */
+    }
+    .agregar-jugador .btn-clear-list:hover { background-color: #d32f2f; }
+
+    .botones-finales {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .botones-finales button {
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .botones-finales button:hover { transform: scale(1.05); }
+    .botones-finales .limpiar { background-color: #f44336; color: white; }
+    .botones-finales .jugar { background-color: #4CAF50; color: white; }
+    .botones-finales .volver-juegos { background-color: #6c757d; color: white; }
+    
+    /* Estilos para el nuevo header */
+    #nombre-juego {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #ffffff; /* Título en blanco para que se lea sobre la imagen */
+    }
+
+  </style>
 </head>
 <body class="gestion">
-  <header class="header-juego">
+  <header class="header-container">
     <!-- 👇 Este nombre se rellena dinámicamente -->
-    <h1 id="nombre-juego"></h1>
-    <p id="mensaje-juego">Entrada de jugadores</p>
-    <button class="volver" onclick="window.location.href='juegos.html'">← Volver a juegos</button>
+    <h1 id="nombre-juego"></h1>    
   </header>
 
-  <hr class="separador">
+  <main class="contenedor-gestion">
+    <div class="agregar-jugador">
+      <input type="text" id="nombre-jugador" placeholder="Añadir nuevo jugador..." onkeypress="if(event.key==='Enter') agregarJugador()">
+      <button class="btn-accion btn-add" onclick="agregarJugador()" title="Añadir jugador">➕</button>
+      <button class="btn-accion btn-clear-list" onclick="limpiarJugadores()" title="Limpiar lista">🧹</button>
+    </div>
 
-  <main>
-    <div class="contenedor-gestion">
+    <div class="card-jugadores">
       <ul id="lista-jugadores" class="lista-jugadores"></ul>
+    </div>
 
-      <div class="agregar-jugador">
-        <input type="text" id="nombre-jugador" placeholder="Nombre" onkeypress="if(event.key==='Enter') agregarJugador()">
-        <button onclick="agregarJugador()">➕ Añadir</button>
-      </div>
-
-      <div class="botones-finales">
-        <button class="limpiar" onclick="limpiarJugadores()">🧹 Limpiar lista</button>
-        <button class="jugar" onclick="irAlJuego()">▶ Ir al juego</button>
-      </div>
+    <div class="botones-finales">
+      <button class="volver-juegos" onclick="window.location.href='juegos.html'">← Volver</button>
+      <button class="jugar" onclick="irAlJuego()">▶ Jugar</button>
     </div>
   </main>
 </body>

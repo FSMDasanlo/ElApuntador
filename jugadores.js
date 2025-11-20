@@ -1,21 +1,54 @@
 let jugadores = JSON.parse(localStorage.getItem('jugadores')) || [];
-let juegoSeleccionado = localStorage.getItem('juegoSeleccionado') || 'continental.html';
+let juegoSeleccionado = localStorage.getItem('juegoSeleccionado') || 'continental'; // Ahora guardamos el nombre de la carpeta
 
 // Mapeo de nombres bonitos para cada juego
 const nombresBonitos = {
-  "continental.html": "CONTINENTAL",
-  "dadosavaricioso.html": "EL AVARICIOSO",
-  // añade aquí los próximos juegos
+  "continental": "CONTINENTAL",
+  "Avaricioso": "EL AVARICIOSO", // ¡SOLUCIÓN! Mapeo para la nueva ruta
+  "pocha": "LA POCHA",
+  "domino": "DOMINÓ",
+  "dadospuntos": "CARRERA DE DADOS"
+  // añade aquí los próximos juegos usando el nombre de su carpeta
+};
+
+// ¡SOLUCIÓN! Mapeo de nombres de imágenes para cada juego.
+// Esto evita problemas si el nombre del archivo de imagen no coincide con el ID del juego.
+const nombresImagenes = {
+  "continental": "continental",
+  "Avaricioso": "dados", // El Avaricioso usa 'dados.jpg'
+  "pocha": "pocha",
+  "domino": "domino",
+  "dadospuntos": "dadospuntos"
 };
 
 // ----------------------------
 // Inicialización y título
 // ----------------------------
 window.addEventListener('DOMContentLoaded', () => {
-  const nombreJuego = nombresBonitos[juegoSeleccionado] || juegoSeleccionado.replace('.html', '').toUpperCase();
-  document.getElementById('nombre-juego').textContent = nombreJuego;
-  document.getElementById('mensaje-juego').textContent = 'Entrada de jugadores';
-  renderLista();
+  // Nos aseguramos de quitar el .html si existiera por datos antiguos en localStorage
+  const juegoId = juegoSeleccionado.replace('.html', '');
+  const nombreJuego = nombresBonitos[juegoId] || juegoId.split('/').pop().toUpperCase();
+  
+  // ¡SOLUCIÓN! Usamos el ID correcto para cada página.
+  const tituloElemento = document.getElementById('texto-titulo-juego') || document.getElementById('nombre-juego');
+  if (tituloElemento) {
+    tituloElemento.textContent = nombreJuego;
+  }
+
+  // --- ¡CORREGIDO! Poner imagen de fondo en la cabecera SOLO en la página de gestión ---
+  // Comprobamos si estamos en la página de gestión antes de ejecutar
+  if (document.body.classList.contains('gestion')) {
+    const headerContainer = document.querySelector('.header-container');
+    if (headerContainer) {
+      // ¡SOLUCIÓN! Usamos el mapa de imágenes para obtener el nombre correcto.
+      const nombreImagen = nombresImagenes[juegoId] || juegoId.split('/').pop();
+      // La ruta es relativa a gestion_jugadores.html, que está en la raíz.
+      const imageUrl = `assets/${nombreImagen}.jpg`;
+      headerContainer.style.backgroundImage = `url('${imageUrl}')`;
+    }
+    // ¡SOLUCIÓN! Solo renderizamos la lista si estamos en la página de gestión.
+    renderLista();
+  }
 });
 
 // ----------------------------
@@ -36,7 +69,7 @@ function renderLista() {
     });
 
     const btnEliminar = document.createElement('button');
-    btnEliminar.textContent = '❌';
+    btnEliminar.innerHTML = '&times;'; // Usamos el carácter de multiplicación, más elegante
     btnEliminar.className = 'borrar-jugador';
     btnEliminar.addEventListener('click', () => eliminarJugador(index));
 
@@ -62,12 +95,15 @@ function agregarJugador() {
 // Permitir añadir pulsando Enter
 document.addEventListener('DOMContentLoaded', () => {
   const input = document.getElementById('nombre-jugador');
-  input.addEventListener('keydown', (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      agregarJugador();
-    }
-  });
+  // ¡SOLUCIÓN! Solo añadimos el listener si el input existe (estamos en gestion_jugadores.html)
+  if (input) {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        agregarJugador();
+      }
+    });
+  }
 });
 
 // ----------------------------
@@ -102,5 +138,21 @@ function irAlJuego() {
     alert("Agrega al menos un jugador antes de empezar.");
     return;
   }
-  window.location.href = juegoSeleccionado;
+  // Corregimos la lógica de redirección.
+  // Ahora la ruta será, por ejemplo: 'continental/continental.html'
+  // Aseguramos que siempre usamos el ID limpio, sin extensiones, por si se ha guardado un valor antiguo.
+  const juegoId = (localStorage.getItem('juegoSeleccionado') || 'continental').replace('.html', '');
+  
+  // ¡SOLUCIÓN! Restauramos la lógica correcta de construcción de URL.
+  let urlFinal;
+  if (juegoId === 'Avaricioso') {
+    // Caso especial para Avaricioso, que tiene un nombre de fichero diferente.
+    urlFinal = 'Avaricioso/dadosavaricioso.html';
+  } else {
+    // Para todos los demás juegos, la carpeta y el fichero se llaman igual.
+    // Ej: 'domino' -> 'domino/domino.html'
+    urlFinal = `${juegoId}/${juegoId}.html`;
+  }
+
+  window.location.href = urlFinal;
 }

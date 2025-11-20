@@ -98,12 +98,8 @@ body.juego {
   padding: 1rem;
 }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
+/* Se aplica a todas las cabeceras EXCEPTO a la de pocha.html que tiene su propio estilo */
+body:not(.juego) header, header:not(:has(.header-content)) { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
 
 header h1 {
   font-size: 1.8rem;
@@ -256,6 +252,13 @@ header .acciones button {
 
 header .acciones button:hover {
   background: #ddd;
+}
+
+main.marcador {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  justify-content: center;
 }
 
 main.marcador .tabla {
