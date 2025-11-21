@@ -177,7 +177,7 @@
       <div id="dados-container"></div>
       <div id="botones-dados-container">
           <button id="boton-tirar-dados">¡Tirar Dados!</button>
-          <button id="boton-plantarse">Plantarse</button>
+          <button id="boton-plantarse">Cerrar</button>
       </div>
       <p id="mensaje-lanzador" class="mensaje-lanzador"></p>
     </div>
@@ -329,7 +329,7 @@
             if (tiradasRestantes > 0) {
                 botonTirarDados.disabled = false;
             } else {
-                mensajeLanzador.textContent = "Última tirada. Anota tus puntos.";
+                mensajeLanzador.innerHTML = "<br>Se acabó. Anota tus puntos.";
             }
             renderizarDados();
         }, 1500);
