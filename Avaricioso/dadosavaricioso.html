@@ -30,7 +30,7 @@
   <div class="botones-superiores">
       <button class="btn-accion" onclick="location.href='../juegos.html'">← A Juegos</button>
       <button class="btn-accion" onclick="location.href='../gestion_jugadores.html'">Nombres</button>
-      <button class="btn-accion" onclick="limpiarPuntuaciones()">Limpiar</button>
+      <button class="btn-accion" onclick="limpiarPuntuaciones()">Limpiar</button>      
       <div class="grupo-voz">
         <button id="btn-voz">🎤 Iniciar voz</button>
         <button id="btn-voz-ayuda" title="Ver comandos de voz" class="btn-help" style="background-color: #f1c40f;">i</button>
@@ -44,6 +44,9 @@
 <div class="opciones-juego">
   <label for="meta-puntos">Meta de Puntos:</label>
   <input type="number" id="meta-puntos" value="5000" min="100" step="100">
+  <button id="btn-abrir-dados" class="btn-lanzar-dados-virtual" title="Lanzar dados virtuales">
+    <img src="/assets/inicio.png" alt="tirar dados">
+  </button>
 </div>
 
 <main class="marcador">
@@ -85,12 +88,34 @@
   </div>
 </div>
 
+<!-- Modal para el Lanzador de Dados Virtual -->
+<div id="modal-dados" class="modal">
+  <div class="modal-contenido" style="max-width: 400px;">
+    <span class="cerrar" id="cerrar-dados">&times;</span>
+    <!-- Contenido del lanzador de dados -->
+    <div id="lanzador-dados-virtual">
+      <h1 id="titulo-lanzador">Turno de...</h1>
+      <p>Puntos en este turno: <strong id="puntos-turno-actual">0</strong></p>
+      <div id="dados-container">
+        <!-- Los 5 dados se generarán aquí con JS -->
+      </div>
+      <div id="botones-dados-container">
+          <button id="boton-tirar-dados">¡Tirar Dados!</button>
+          <button id="boton-plantarse" style="display: none;">Plantarse</button>
+      </div>
+      <p id="mensaje-lanzador" class="mensaje-lanzador"></p>
+    </div>
+    <!-- Fin del contenido del lanzador -->
+  </div>
+</div>
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     // La lógica del modal de voz ya está en componentes-comunes.js
 
     // Lógica para el modal de ayuda del reglamento
     const modalAyuda = document.getElementById("modal-ayuda");
+    const modalDados = document.getElementById("modal-dados");
     const btnAyuda = document.getElementById("btn-ayuda");
     const cerrarAyuda = modalAyuda.querySelector(".cerrar");
 
@@ -101,6 +126,197 @@
         if (e.target === modalAyuda) modalAyuda.style.display = "none";
       });
     }
+
+    // --- LÓGICA PARA EL MODAL DE DADOS VIRTUALES ---
+    const btnAbrirDados = document.getElementById("btn-abrir-dados");
+    const cerrarDados = document.getElementById("cerrar-dados");
+
+    if (btnAbrirDados && modalDados && cerrarDados) {
+      btnAbrirDados.addEventListener("click", () => { 
+        modalDados.style.display = "block";
+        iniciarTurnoDados(); // Prepara el primer turno al abrir
+      });
+      cerrarDados.addEventListener("click", () => { modalDados.style.display = "none"; });
+      window.addEventListener("click", (e) => {
+        if (e.target === modalDados) modalDados.style.display = "none";
+      });
+    }
+
+    // --- LÓGICA DEL LANZADOR DE DADOS VIRTUAL (AVARICIOSO) ---
+    const caras = {
+        "As": { img: "/assets/as.png", puntos: 100 },
+        "K": { img: "/assets/k.png", puntos: 50 },
+        "Q": { img: "/assets/q.png", puntos: 0 },
+        "J": { img: "/assets/j.png", puntos: 0 },
+        "Rojo": { img: "/assets/rojos.png", puntos: 0 },
+        "Negro": { img: "/assets/negros.png", puntos: 0 }
+    };
+    const nombresCaras = Object.keys(caras);
+    const tituloLanzador = document.getElementById('titulo-lanzador');
+    const dadosContainer = document.getElementById('dados-container');
+    const botonTirarDados = document.getElementById('boton-tirar-dados');
+    const botonPlantarse = document.getElementById('boton-plantarse');
+    const puntosTurnoActualElem = document.getElementById('puntos-turno-actual');
+    const mensajeLanzador = document.getElementById('mensaje-lanzador');
+
+    const NUM_DADOS = 5;
+    let jugadorActualIndex = 0;
+    let estadoDados = [];
+    let puntosTurno = 0;
+
+    function iniciarTurnoDados() {
+        if (jugadores.length === 0) {
+            tituloLanzador.textContent = "Añade jugadores primero";
+            botonTirarDados.disabled = true;
+            return;
+        }
+        const nombreJugador = jugadores[jugadorActualIndex];
+        tituloLanzador.textContent = `Turno de ${nombreJugador}`;
+        puntosTurno = 0;
+        puntosTurnoActualElem.textContent = "0";
+        mensajeLanzador.textContent = "";
+        botonPlantarse.style.display = 'none';
+        botonTirarDados.disabled = false;
+        botonTirarDados.textContent = "¡Tirar Dados!";
+        
+        botonTirarDados.classList.remove('btn-doblar');
+        estadoDados = Array.from({ length: NUM_DADOS }, () => ({ estado: 'activo', valor: null }));
+        renderizarDados();
+    }
+
+    function renderizarDados() {
+        dadosContainer.innerHTML = '';
+        estadoDados.forEach((dado, i) => {
+            const img = document.createElement('img');
+            img.dataset.index = i;
+            if (dado.estado === 'girando') {
+                img.src = '/assets/dado_girando.gif';
+                img.alt = 'Dado girando';
+            } else if (dado.valor) {
+                img.src = caras[dado.valor].img;
+                img.alt = `Resultado: ${dado.valor}`;
+                if (dado.estado === 'apartado') {
+                    img.classList.add('apartado');
+                }
+                if (dado.estado === 'tirado' && caras[dado.valor].puntos > 0) {
+                    img.classList.add('puntua');
+                    img.addEventListener('click', seleccionarDado);
+                }
+            } else {
+                img.src = '/assets/inicio.png';
+                img.alt = 'Dado inicial';
+            }
+            dadosContainer.appendChild(img);
+        });
+    }
+
+    function tirarDados() {
+        botonTirarDados.disabled = true;
+        botonPlantarse.style.display = 'none';
+        mensajeLanzador.textContent = "";
+        botonTirarDados.classList.remove('btn-doblar');
+
+        // Corregido: Poner a girar los dados activos (primera tirada) Y los que ya fueron tirados pero no apartados (siguientes tiradas).
+        let dadosParaTirar = false;
+        estadoDados.forEach(d => { 
+            if (d.estado === 'activo' || d.estado === 'tirado') {
+                d.estado = 'girando';
+                dadosParaTirar = true;
+            }
+        });
+        renderizarDados();
+
+        setTimeout(() => {
+            const tiradaActual = [];
+            estadoDados.forEach(d => {
+                if (d.estado === 'girando') {
+                    d.valor = nombresCaras[Math.floor(Math.random() * nombresCaras.length)];
+                    d.estado = 'tirado';
+                    tiradaActual.push(d);
+                }
+            });
+
+            // Analizar la tirada para combinaciones y puntos
+            const conteo = tiradaActual.reduce((acc, dado) => {
+                acc[dado.valor] = (acc[dado.valor] || 0) + 1;
+                return acc;
+            }, {});
+
+            let puntosCombinacion = 0;
+            let mensajeCombinacion = "";
+
+            if (conteo['As'] >= 3) {
+                puntosCombinacion = 1000;
+                mensajeCombinacion = "¡Tres Ases! +1000 puntos";
+                tiradaActual.filter(d => d.valor === 'As').slice(0, 3).forEach(d => d.estado = 'apartado');
+            } else if (conteo['K'] >= 3) {
+                puntosCombinacion = 500;
+                mensajeCombinacion = "¡Tres K! +500 puntos";
+                tiradaActual.filter(d => d.valor === 'K').slice(0, 3).forEach(d => d.estado = 'apartado');
+            }
+
+            if (puntosCombinacion > 0) {
+                puntosTurno += puntosCombinacion;
+                puntosTurnoActualElem.textContent = puntosTurno;
+                mensajeLanzador.textContent = mensajeCombinacion;
+                botonPlantarse.style.display = 'inline-block';
+            }
+
+            const hayPuntosIndividuales = tiradaActual.some(d => d.estado === 'tirado' && caras[d.valor].puntos > 0);
+            const tiradaSinPuntos = puntosCombinacion === 0 && !hayPuntosIndividuales;
+
+            if (tiradaSinPuntos) {
+                mensajeLanzador.textContent = "¡Mala suerte! No has sacado puntos. Turno perdido.";
+                puntosTurno = 0;
+                setTimeout(cambiarJugador, 2000);
+            } else {
+                botonTirarDados.disabled = false;
+                botonTirarDados.textContent = "Volver a tirar";
+            }
+            renderizarDados();
+            comprobarSiDobla();
+        }, 1500); // Animación más corta
+    }
+
+    function seleccionarDado(e) {
+        const index = parseInt(e.target.dataset.index);
+        const dado = estadoDados[index];
+        if (dado.estado !== 'tirado' || caras[dado.valor].puntos === 0) return;
+
+        dado.estado = 'apartado';
+        puntosTurno += caras[dado.valor].puntos;
+        puntosTurnoActualElem.textContent = puntosTurno;
+        botonPlantarse.style.display = 'inline-block';
+        renderizarDados();
+        comprobarSiDobla();
+    }
+
+    function comprobarSiDobla() {
+        const todosApartados = estadoDados.every(d => d.estado === 'apartado');
+        if (todosApartados) {
+            mensajeLanzador.textContent = "¡Has puntuado con los 5 dados!";
+            botonTirarDados.textContent = "¡DOBLARSE! (Tirar 5 de nuevo)";
+            botonTirarDados.classList.add('btn-doblar');
+            // Reiniciamos el estado de los dados para la siguiente tirada
+            estadoDados = Array.from({ length: NUM_DADOS }, () => ({ estado: 'activo', valor: null }));
+            // ¡NUEVO! Mostramos los dados como "reseteados" para que sea más claro
+            renderizarDados();
+        }
+    }
+
+    function cambiarJugador() {
+        jugadorActualIndex = (jugadorActualIndex + 1) % jugadores.length;
+        iniciarTurnoDados();
+    };
+
+    botonTirarDados.addEventListener('click', tirarDados);
+    botonPlantarse.addEventListener('click', () => {
+        const nombreJugador = jugadores[jugadorActualIndex];
+        window.actualizarPuntosPorVoz(nombreJugador, puntosTurno); // Reutilizamos la función de voz
+        modalDados.style.display = 'none'; // Cierra el modal al plantarse
+        cambiarJugador();
+    });
+
   });
 </script>
 

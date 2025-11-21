@@ -252,6 +252,7 @@ main.marcador {
   font-size: 1.2rem;
   border: none;
   border-radius: 50%;
+  background-color: #4a90e2; /* ¡CORREGIDO! Añadido el color de fondo azul */
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
   transition: transform 0.2s, background-color 0.2s;
@@ -297,4 +298,100 @@ main.marcador {
 #btn-add-row:hover {
   background-color: #218838;
   transform: translateY(-50%) scale(1.1);
+}
+
+/* ¡NUEVO! Estilo para el botón de lanzar dados virtual */
+.btn-lanzar-dados-virtual {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-left: 15px; /* Espacio a la izquierda */
+  transition: transform 0.2s;
+}
+
+.btn-lanzar-dados-virtual:hover {
+  transform: scale(1.1);
+}
+
+.btn-lanzar-dados-virtual img {
+  width: 50px; /* Tamaño de la imagen del dado */
+  height: auto;
+}
+
+/* ======================================================= */
+/* ===== LANZADOR DE DADOS VIRTUAL (MODAL) =============== */
+/* ======================================================= */
+
+#lanzador-dados-virtual {
+  text-align: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 15px;
+}
+
+#lanzador-dados-virtual h1 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+#lanzador-dados-virtual #dados-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+#lanzador-dados-virtual #dados-container img {
+  width: 60px;
+  height: 60px;
+  border: 3px solid transparent;
+  border-radius: 8px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+#lanzador-dados-virtual #dados-container img.puntua {
+  cursor: pointer;
+}
+
+#lanzador-dados-virtual #dados-container img.puntua:hover {
+  transform: scale(1.1);
+}
+
+#lanzador-dados-virtual #dados-container img.apartado {
+  border-color: #28a745; /* Verde para dados apartados */
+  opacity: 0.7;
+}
+
+#lanzador-dados-virtual #botones-dados-container button { 
+  font-size: 1.2em; 
+  padding: 10px 20px; 
+  cursor: pointer; 
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin: 0 5px;
+}
+
+#lanzador-dados-virtual #boton-plantarse {
+  background-color: #28a745;
+  color: white;
+  border-color: #1f7a34;
+}
+
+/* ¡NUEVO! Estilo para el botón de doblarse */
+#lanzador-dados-virtual .btn-doblar {
+  background-color: #e74c3c; /* Rojo de riesgo */
+  color: white;
+  border-color: #c0392b;
+}
+
+.mensaje-lanzador {
+  margin-top: 1rem;
+  font-weight: bold;
+  color: #d9534f;
+  min-height: 1.2em;
+}
+
+.mensaje-lanzador:not(:empty) {
+  color: #28a745; /* Verde para mensajes de puntos */
 }
