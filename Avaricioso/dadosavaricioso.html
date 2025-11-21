@@ -45,7 +45,7 @@
   <label for="meta-puntos">Meta de Puntos:</label>
   <input type="number" id="meta-puntos" value="5000" min="100" step="100">
   <button id="btn-abrir-dados" class="btn-lanzar-dados-virtual" title="Lanzar dados virtuales">
-    <img src="/assets/inicio.png" alt="tirar dados">
+    <img src="../assets/inicio.png" alt="tirar dados">
   </button>
 </div>
 
@@ -144,12 +144,12 @@
 
     // --- LÓGICA DEL LANZADOR DE DADOS VIRTUAL (AVARICIOSO) ---
     const caras = {
-        "As": { img: "/assets/as.png", puntos: 100 },
-        "K": { img: "/assets/k.png", puntos: 50 },
-        "Q": { img: "/assets/q.png", puntos: 0 },
-        "J": { img: "/assets/j.png", puntos: 0 },
-        "Rojo": { img: "/assets/rojos.png", puntos: 0 },
-        "Negro": { img: "/assets/negros.png", puntos: 0 }
+        "As": { img: "../assets/as.png", puntos: 100 },
+        "K": { img: "../assets/k.png", puntos: 50 },
+        "Q": { img: "../assets/q.png", puntos: 0 },
+        "J": { img: "../assets/j.png", puntos: 0 },
+        "Rojo": { img: "../assets/rojos.png", puntos: 0 },
+        "Negro": { img: "../assets/negros.png", puntos: 0 }
     };
     const nombresCaras = Object.keys(caras);
     const tituloLanzador = document.getElementById('titulo-lanzador');
@@ -190,7 +190,7 @@
             const img = document.createElement('img');
             img.dataset.index = i;
             if (dado.estado === 'girando') {
-                img.src = '/assets/dado_girando.gif';
+                img.src = '../assets/dado_girando.gif';
                 img.alt = 'Dado girando';
             } else if (dado.valor) {
                 img.src = caras[dado.valor].img;
@@ -203,7 +203,7 @@
                     img.addEventListener('click', seleccionarDado);
                 }
             } else {
-                img.src = '/assets/inicio.png';
+                img.src = '../assets/inicio.png';
                 img.alt = 'Dado inicial';
             }
             dadosContainer.appendChild(img);
