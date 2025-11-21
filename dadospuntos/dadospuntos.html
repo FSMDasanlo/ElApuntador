@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Anotador de puntos para el juego de mesa Carrera de Dados.">
   <title>El Apuntador - Carrera de Dados</title>
   <link rel="stylesheet" href="style_dadospuntos.css">
   <script src="../jugadores.js" defer></script>
@@ -10,6 +11,74 @@
   <script src="../voz-navegador.js" defer></script>
   <script src="../componentes-comunes.js" defer></script>
 </head>
+<style>
+  /* Estilos para el lanzador de dados virtual, adaptados para dadospuntos.html */
+  .btn-lanzar-dados-virtual {
+    background: none; border: none; padding: 0; cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .btn-lanzar-dados-virtual:hover { transform: scale(1.1); }
+  .btn-lanzar-dados-virtual img { width: 60px; height: auto; }
+
+  #lanzador-dados-virtual {
+    text-align: center; padding: 1rem; background: white; border-radius: 15px;
+  }
+  #lanzador-dados-virtual h1 {
+    margin-bottom: 0.5rem; color: #333; font-size: 1.5rem;
+  }
+  #lanzador-dados-virtual p {
+    margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem;
+  }
+  #lanzador-dados-virtual #dados-container {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 1.5rem;
+  }
+  #lanzador-dados-virtual #dados-container img {
+    width: 60px; height: 60px; border: 3px solid transparent;
+    border-radius: 8px; transition: all 0.2s; cursor: pointer;
+  }
+  #lanzador-dados-virtual #dados-container img:hover {
+    transform: scale(1.1);
+  }
+  #lanzador-dados-virtual #dados-container img.apartado {
+    border-color: #28a745;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+  }
+  #lanzador-dados-virtual #dados-container img.bloqueado {
+    border-color: #dc3545; /* Borde rojo para dados no seleccionables */
+    cursor: not-allowed;
+  }
+  #lanzador-dados-virtual #botones-dados-container button { 
+    font-size: 1.2em; padding: 10px 20px; cursor: pointer; 
+    border-radius: 8px; border: 1px solid #ccc; margin: 0 5px;
+  }
+  #lanzador-dados-virtual #boton-plantarse {
+    background-color: #4a90e2; color: white; border-color: #357ab8;
+  }
+  .mensaje-lanzador {
+    margin-top: 1rem; font-weight: bold; color: #d9534f; min-height: 1.2em;
+  }
+  /* Nuevo contenedor para alinear título y botón de dados */
+  .cabecera-ronda {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 0.5rem; /* Espacio antes de la tabla */
+  }
+  .titulo-ronda h3 { margin: 0; }
+
+  /* Estilo para resaltar la fila del jugador activo */
+  .ayuda-seleccion {
+    font-style: italic;
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+  }
+  .jugador-activo {
+    background-color: #e8f4fd !important; /* Un azul claro para destacar */
+  }
+</style>
 <body class="juego">
 
 <div class="cabecera-juego">
@@ -44,16 +113,23 @@
 <main class="marcador">
   <div id="tablas-rondas-wrapper">
     <div id="tablas-rondas">
-        <div class="tabla-ronda" id="contenedor-ascendente">
-             <h3>Ronda Libre (puedes repetir categoría)</h3>
-             <table id="tabla-puntos-ascendente">
+      <div class="tabla-ronda" id="contenedor-ascendente">
+          <div class="cabecera-ronda">
+              <div class="titulo-ronda">
+                  <h3>Ronda Libre (puedes ir en el orden que quieras)</h3>
+              </div>
+              <button id="btn-abrir-dados" class="btn-lanzar-dados-virtual" title="Lanzar dados virtuales">
+                <img src="../assets/inicio.png" alt="tirar dados">
+              </button>
+          </div>
+          <table id="tabla-puntos-ascendente">
                 <thead></thead>
                 <tbody id="cuerpo-tabla-ascendente"></tbody>
              </table>
         </div>
 
         <div class="tabla-ronda" id="contenedor-descendente">
-             <h3>Ronda Obligada (una vez por categoría)</h3>
+             <h3>Ronda Obligada (de negros a Ases)</h3>
              <table id="tabla-puntos-descendente">
                 <thead></thead>
                 <tbody id="cuerpo-tabla-descendente"></tbody>
@@ -89,6 +165,25 @@
   </div>
 </div>
 
+<!-- Modal para el Lanzador de Dados Virtual -->
+<div id="modal-dados" class="modal">
+  <div class="modal-contenido" style="max-width: 500px;">
+    <span class="cerrar" id="cerrar-dados">&times;</span>
+    <!-- Contenido del lanzador de dados -->
+    <div id="lanzador-dados-virtual">
+      <h1 id="titulo-lanzador">Turno de...</h1>
+      <p>Tiradas restantes: <strong id="tiradas-restantes">3</strong></p>
+      <p class="ayuda-seleccion">Selecciona los dados con los que te quedas</p>
+      <div id="dados-container"></div>
+      <div id="botones-dados-container">
+          <button id="boton-tirar-dados">¡Tirar Dados!</button>
+          <button id="boton-plantarse">Plantarse</button>
+      </div>
+      <p id="mensaje-lanzador" class="mensaje-lanzador"></p>
+    </div>
+  </div>
+</div>
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     // Lógica para el modal de ayuda del reglamento
@@ -103,6 +198,169 @@
         if (e.target === modalAyuda) modalAyuda.style.display = "none";
       });
     }
+
+    // --- LÓGICA PARA EL MODAL DE DADOS VIRTUALES (CARRERA DE DADOS) ---
+    const modalDados = document.getElementById("modal-dados");
+    const btnAbrirDados = document.getElementById("btn-abrir-dados");
+    const cerrarDados = document.getElementById("cerrar-dados");
+
+    if (btnAbrirDados && modalDados && cerrarDados) {
+      btnAbrirDados.addEventListener("click", () => { 
+        modalDados.style.display = "block";
+        iniciarTurnoDados(); // Prepara el turno para el jugador actual
+      });
+      cerrarDados.addEventListener("click", () => { modalDados.style.display = "none"; });
+      window.addEventListener("click", (e) => {
+        if (e.target === modalDados) modalDados.style.display = "none";
+      });
+    }
+
+    const caras = {
+        "As": { img: "../assets/as.png" }, "K": { img: "../assets/k.png" },
+        "Q": { img: "../assets/q.png" }, "J": { img: "../assets/j.png" },
+        "Rojo": { img: "../assets/rojos.png" }, "Negro": { img: "../assets/negros.png" }
+    };
+    const nombresCaras = Object.keys(caras);
+    const tituloLanzador = document.getElementById('titulo-lanzador');
+    const dadosContainer = document.getElementById('dados-container');
+    // --- INICIO MODIFICACIÓN: Referencia a la tabla de la RONDA LIBRE
+    const cuerpoTablaLibre = document.getElementById('cuerpo-tabla-ascendente');
+    const mapaCarasACategorias = {
+        "As": "AS", "K": "K", "Q": "Q", "J": "J",
+        "Rojo": "R", "Negro": "N"
+    };
+    const botonTirarDados = document.getElementById('boton-tirar-dados');
+    const botonPlantarse = document.getElementById('boton-plantarse');
+    const tiradasRestantesElem = document.getElementById('tiradas-restantes');
+    const mensajeLanzador = document.getElementById('mensaje-lanzador');
+
+    const NUM_DADOS = 5;
+    const MAX_TIRADAS = 3;
+    let jugadorActualIndex = 0; // <<-- ESTRATEGIA NUEVA: Igual que en Avaricioso
+    let estadoDados = [];
+    let tiradasRestantes = MAX_TIRADAS;
+    let nombreJugadorActual = '';
+
+    function iniciarTurnoDados() {
+        const jugadores = window.listaJugadoresParaVoz || [];
+        if (jugadores.length === 0) {
+            tituloLanzador.textContent = "Añade jugadores primero";
+            botonTirarDados.disabled = true;
+            return;
+        }
+        nombreJugadorActual = jugadores[jugadorActualIndex];
+        tituloLanzador.textContent = `Turno de ${nombreJugadorActual}`;
+        tiradasRestantes = MAX_TIRADAS;
+        tiradasRestantesElem.textContent = tiradasRestantes;
+        mensajeLanzador.textContent = "";
+        botonTirarDados.disabled = false;
+        botonPlantarse.disabled = false;
+        
+        estadoDados = Array.from({ length: NUM_DADOS }, () => ({ estado: 'activo', valor: null }));
+        renderizarDados();
+    }
+
+    function renderizarDados() {
+        dadosContainer.innerHTML = '';
+        estadoDados.forEach((dado, i) => {
+            const img = document.createElement('img');
+            img.dataset.index = i;
+
+            if (dado.estado === 'girando') {
+                img.src = '../assets/dado_girando.gif';
+                img.alt = 'Dado girando';
+                // No añadimos listener a los dados que giran
+            } else if (dado.valor) {
+                img.src = caras[dado.valor].img;
+                img.alt = `Resultado: ${dado.valor}`;
+                if (dado.estado === 'apartado') {
+                    img.classList.add('apartado');
+                } else if (dado.estado === 'bloqueado') {
+                    // --- INICIO MODIFICACIÓN: Añadir clase para dado bloqueado ---
+                    img.classList.add('bloqueado');
+                    img.title = "Esta categoría ya la tienes"; // Tooltip para dados bloqueados
+                    // --- FIN MODIFICACIÓN ---
+                }
+                img.addEventListener('click', toggleApartarDado); // Añadimos listener a los dados con resultado
+            } else {
+                img.src = '../assets/inicio.png';
+                img.alt = 'Dado inicial';
+                // No añadimos listener al dado inicial sin valor
+            }
+            dadosContainer.appendChild(img);
+        });
+    }
+
+    function tirarDados() {
+        if (tiradasRestantes <= 0) return;
+
+        tiradasRestantes--;
+        tiradasRestantesElem.textContent = tiradasRestantes;
+        botonTirarDados.disabled = true;
+
+        // --- INICIO MODIFICACIÓN: Poner a girar también los dados 'bloqueados' ---
+        estadoDados.forEach(d => { if (d.estado === 'activo' || d.estado === 'bloqueado') d.estado = 'girando' });
+        // --- FIN MODIFICACIÓN ---
+        renderizarDados();
+
+        setTimeout(() => {
+            estadoDados.forEach(d => {
+                if (d.estado === 'girando') {
+                    d.valor = nombresCaras[Math.floor(Math.random() * nombresCaras.length)];
+                    d.estado = 'activo';
+                }
+            });
+
+            // --- INICIO MODIFICACIÓN: Marcar dados bloqueados después de tirar ---
+            const filaJugador = cuerpoTablaLibre.querySelector(`tr[data-jugador="${nombreJugadorActual}"]`);
+            if (filaJugador) {
+                estadoDados.forEach(dado => {
+                    if (dado.valor) {
+                        const categoria = mapaCarasACategorias[dado.valor];
+                        const celda = filaJugador.querySelector(`td[data-categoria="${categoria}"]`);
+                        if (celda && celda.textContent.trim() !== '' && celda.textContent.trim() !== '0') {
+                            dado.estado = 'bloqueado'; // Nuevo estado para dados no seleccionables
+                        }
+                    }
+                });
+            }
+            // --- FIN MODIFICACIÓN ---
+
+            if (tiradasRestantes > 0) {
+                botonTirarDados.disabled = false;
+            } else {
+                mensajeLanzador.textContent = "Última tirada. Anota tus puntos.";
+            }
+            renderizarDados();
+        }, 1500);
+    }
+
+    function toggleApartarDado(e) {
+        const index = parseInt(e.target.dataset.index);
+        const dado = estadoDados[index];
+
+        // --- INICIO MODIFICACIÓN: Lógica de bloqueo y aviso ---
+        if (dado.estado === 'bloqueado') {
+            console.log("Intento de apartar dado bloqueado. Acción impedida.");
+            return; // Impedimos cualquier acción, pero sin mensaje de voz.
+        }
+
+        // Si el dado no está bloqueado y es clickeable (no ha sido tirado o no es ni activo ni apartado), no hacer nada.
+        if (!dado.valor || (dado.estado !== 'activo' && dado.estado !== 'apartado')) return;
+        dado.estado = (dado.estado === 'apartado') ? 'activo' : 'apartado';
+        renderizarDados();
+    }
+
+    function cambiarJugador() {
+        // ESTRATEGIA NUEVA: Simplemente avanzamos el índice y cerramos.
+        const jugadores = window.listaJugadoresParaVoz || [];
+        jugadorActualIndex = (jugadorActualIndex + 1) % jugadores.length;
+        const modalDados = document.getElementById("modal-dados");
+        if (modalDados) modalDados.style.display = "none";
+    };
+
+    botonTirarDados.addEventListener('click', tirarDados);
+    botonPlantarse.addEventListener('click', cambiarJugador);
   });
 </script>
 
