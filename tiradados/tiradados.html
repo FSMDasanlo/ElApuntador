@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiradados - El Apuntador</title>
+  <link rel="stylesheet" href="tiradados.css">
+  <script src="tiradados.js" defer></script>
+</head>
+<body>
+
+  <div class="contenedor-principal">
+
+    <a href="../juegos.html" class="btn-cerrar" title="Volver a juegos">&times;</a>
+    
+    <!-- 1. Cabecera -->
+    <header class="cabecera">
+      <h1>
+        Tira los dados
+        <span id="icono-titulo"></span>
+      </h1>
+    </header>
+
+    <!-- 2. Opciones -->
+    <div class="opciones">
+      <div class="opcion">
+        <label for="num-dados">Número de dados:</label>
+        <input type="number" id="num-dados" value="5" min="1" max="10">
+      </div>
+      <div class="opcion">
+        <label for="dados-americanos">¿Americanos?</label>
+        <input type="checkbox" id="dados-americanos" checked>
+      </div>
+    </div>
+
+    <!-- Contenedor para mostrar los dados -->
+    <div id="dados-container">
+      <img src="../assets/cubilete.png" alt="Cubilete" id="cubilete-inicial">
+    </div>
+
+    <!-- Botón de Tirada -->
+    <button id="btn-tirar">¡Lanzar Dados!</button>
+
+  </div>
+
+</body>
+</html>
