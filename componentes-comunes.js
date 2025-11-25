@@ -15,19 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
  * También gestiona la lógica para mostrarlo y ocultarlo.
  */
 function inyectarModalAyudaVoz() {
-    // Obtenemos el juego actual para mostrar la ayuda contextual.
-    const juegoSeleccionado = localStorage.getItem('juegoSeleccionado') || '';
-
-    // Creamos el bloque de ayuda específico para "Carrera de Dados" solo si es el juego actual.
-    const ayudaCarreraDados = juegoSeleccionado.includes('dadospuntos') ? `
-        <h4>Para Carrera de Dados (con categoría):</h4>
-        <p>Para este juego, debes especificar la categoría al final. Ejemplos:</p>
-        <ul>
-          <li><em>"Sandra 15 en Reyes"</em></li>
-          <li><em>"Juan 8 en Rojos"</em></li>
-          <li><em>"Jesús 6 en Ases"</em></li>
-        </ul>` : '';
-
     // 1. Definimos el HTML del modal como un string.
     const htmlModalVoz = `
     <div id="modal-voz-ayuda" class="modal">
@@ -43,7 +30,14 @@ function inyectarModalAyudaVoz() {
           <li><em>"Ana menos cincuenta"</em></li>
         </ul>
 
-        ${ayudaCarreraDados}
+        <h4>Para Carrera de Dados (con categoría):</h4>
+        <p>Para este juego, debes especificar la categoría al final. Ejemplos:</p>
+        <ul>
+          <li><em>"Sandra 15 en Reyes"</em></li>
+          <li><em>"Juan 8 en Rojos"</em></li>
+          <li><em>"Jesús 6 en Ases"</em></li>
+        </ul>
+
         <h4>Comandos Generales:</h4>
         <ul>
             <li><strong>"Deshacer"</strong> o <strong>"Corrige"</strong>: Borra la última puntuación introducida.</li>
