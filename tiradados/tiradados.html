@@ -6,6 +6,16 @@
   <title>Tiradados - El Apuntador</title>
   <link rel="stylesheet" href="tiradados.css">
   <script src="tiradados.js" defer></script>
+  <style>
+    /* Estilo para resaltar los dados seleccionados */
+    .dado.seleccionado {
+      border: 4px solid #d9534f; /* Borde rojo llamativo */
+      box-shadow: 0 0 10px rgba(217, 83, 79, 0.7); /* Sombra roja suave */
+      transform: scale(0.95); /* Ligero encogimiento para dar feedback */
+      border-radius: 12px; /* Bordes redondeados para que se ajuste al dado */
+      box-sizing: border-box; /* Para que el borde no aumente el tamaño total */
+    }
+  </style>
 </head>
 <body>
 
@@ -21,7 +31,7 @@
       </h1>
     </header>
 
-    <!-- 2. Opciones -->
+    <!-- 2. Opciones (Restauradas) -->
     <div class="opciones">
       <div class="opcion">
         <label for="num-dados">Número de dados:</label>
@@ -34,14 +44,26 @@
     </div>
 
     <!-- Contenedor para mostrar los dados -->
-    <div id="dados-container">
-      <img src="../assets/cubilete.png" alt="Cubilete" id="cubilete-inicial">
-    </div>
+    <div id="dados-container" class="dados-container"></div>
 
     <!-- Botón de Tirada -->
-    <button id="btn-tirar">¡Lanzar Dados!</button>
+    <button id="btn-tirar" class="boton-grande">¡Lanzar Dados!</button> 
 
   </div>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Ahora sí, llamamos a la función para inicializar el juego de dados.
+      inicializarTiradaDados({
+        contenedorDadosId: 'dados-container',
+        botonTirarId: 'btn-tirar',
+        numDadosInputId: 'num-dados', // ID del input de número de dados
+        dadosAmericanosCheckId: 'dados-americanos', // ID del checkbox
+        onTiradaCompleta: (valores) => {
+          console.log('Tirada finalizada. Valores:', valores);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
