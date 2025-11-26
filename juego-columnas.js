@@ -24,8 +24,10 @@ function inicializarJuegoColumnas(config) {
     rankingContainer.className = "ranking";
     rankingContainer.innerHTML = "<h3>Ranking en vivo</h3><ol id='ranking-list'></ol>";
     tabla.parentNode.appendChild(rankingContainer);
-
-    let jugadores = JSON.parse(localStorage.getItem("jugadores")) || [];
+    
+    // ¡SOLUCIÓN! Leemos desde la clave global correcta usando la función de jugadores.js
+    const claveJugadores = getClaveLocalStorage(); // Esto devolverá 'jugadores_global'
+    let jugadores = JSON.parse(localStorage.getItem(claveJugadores)) || [];
     let historialPuntuaciones = [];
 
     // ===== Modal de ayuda =====

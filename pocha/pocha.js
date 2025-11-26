@@ -5,7 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const cuerpoTablaDesc = document.getElementById("cuerpo-tabla-descendente");
   const tablaDesc = document.getElementById("tabla-puntos-descendente");
 
-  let jugadores = JSON.parse(localStorage.getItem("jugadores")) || [];
+  // ¡SOLUCIÓN! Leemos desde la clave global correcta usando la función de jugadores.js
+  const claveJugadores = getClaveLocalStorage(); // Esto devolverá 'jugadores_global'
+  let jugadores = JSON.parse(localStorage.getItem(claveJugadores)) || [];
   
   // ¡SOLUCIÓN! Hacemos la lista de jugadores accesible globalmente
   // para que el sistema de voz pueda usarla de forma segura.

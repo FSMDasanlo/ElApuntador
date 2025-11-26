@@ -7,7 +7,9 @@ let historialPuntuaciones = []; // Para la función de deshacer
  * Esto evita condiciones de carrera entre 'load' y 'DOMContentLoaded'.
  */
 window.addEventListener('DOMContentLoaded', () => {
-  const nombresGuardados = JSON.parse(localStorage.getItem('jugadores')) || [];
+  // ¡SOLUCIÓN! Leemos desde la clave global correcta usando la función de jugadores.js
+  const claveJugadores = getClaveLocalStorage(); // Esto devolverá 'jugadores_global'
+  const nombresGuardados = JSON.parse(localStorage.getItem(claveJugadores)) || [];
   const puntuacionesGuardadas = JSON.parse(localStorage.getItem('continentalPuntuaciones'));
 
   // Fusionamos nombres y puntuaciones para asegurar la sincronización

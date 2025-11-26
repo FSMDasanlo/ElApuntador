@@ -1,4 +1,14 @@
-let jugadores = JSON.parse(localStorage.getItem('jugadores')) || [];
+/**
+ * Obtiene la clave única para guardar/recuperar datos del localStorage
+ * para el juego actualmente seleccionado.
+ */
+function getClaveLocalStorage() {
+  // ¡CAMBIO! Usamos una única clave para todos los juegos.
+  // Así, la lista de jugadores es compartida.
+  return 'jugadores_global';
+}
+
+let jugadores = JSON.parse(localStorage.getItem(getClaveLocalStorage())) || [];
 let juegoSeleccionado = localStorage.getItem('juegoSeleccionado') || 'continental'; // Ahora guardamos el nombre de la carpeta
 
 // Mapeo de nombres bonitos para cada juego
@@ -48,6 +58,12 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     // ¡SOLUCIÓN! Solo renderizamos la lista si estamos en la página de gestión.
     renderLista();
+  }
+
+  // Aseguramos que 'jugadores' sea siempre un array de strings.
+  // Si por alguna razón se guarda algo incorrecto, lo reseteamos.
+  if (!Array.isArray(jugadores) || jugadores.some(j => typeof j !== 'string')) {
+    jugadores = [];
   }
 });
 
@@ -127,7 +143,12 @@ function limpiarJugadores() {
 // Guardar en localStorage
 // ----------------------------
 function guardarJugadores() {
-  localStorage.setItem('jugadores', JSON.stringify(jugadores));
+  const jugadoresJSON = JSON.stringify(jugadores);
+  // Guardamos en la clave global para los juegos nuevos/actualizados.
+  localStorage.setItem(getClaveLocalStorage(), jugadoresJSON);
+  // ¡SOLUCIÓN DEFINITIVA! También guardamos en la clave "legacy" o antigua.
+  // Esto da compatibilidad a los juegos que no han sido actualizados (Dominó, etc.)
+  localStorage.setItem('jugadores', jugadoresJSON);
 }
 
 // ----------------------------
@@ -138,6 +159,11 @@ function irAlJuego() {
     alert("Agrega al menos un jugador antes de empezar.");
     return;
   }
+  
+  // ¡SOLUCIÓN! Guardamos la lista de jugadores justo antes de navegar.
+  // Esto asegura que la página del juego recibirá la lista más actualizada.
+  guardarJugadores();
+
   // Corregimos la lógica de redirección.
   // Ahora la ruta será, por ejemplo: 'continental/continental.html'
   // Aseguramos que siempre usamos el ID limpio, sin extensiones, por si se ha guardado un valor antiguo.
