@@ -321,41 +321,50 @@ document.addEventListener("DOMContentLoaded", () => {
     // MODIFICADO: Solo suma si no hay clase de error
     function calcularPuntuaciones() {
         Array.from(cuerpoTablaAsc.rows).forEach(rowAsc => {
-            let suma = 0;
-            const rowDesc = cuerpoTablaDesc.querySelector(`tr[data-jugador="${rowAsc.cells[0].textContent}"]`);
+            let sumaAsc = 0;
+            let sumaTotal = 0;
+            const nombre = rowAsc.getAttribute('data-jugador');
+            const rowDesc = cuerpoTablaDesc.querySelector(`tr[data-jugador="${nombre}"]`);
 
             // Sumar puntos de la tabla ascendente (Libre)
             for (let i = 1; i < rowAsc.cells.length - 1; i++) {
                 const cell = rowAsc.cells[i];
                 if (!cell.classList.contains('error-multiplo')) {
                     const val = parseInt(cell.textContent || 0);
-                    if (!isNaN(val)) suma += val;
+                    if (!isNaN(val)) sumaAsc += val;
                 }
             }
             
+            sumaTotal = sumaAsc;
+
             // Sumar puntos de la tabla descendente (Obligada)
             if (rowDesc) {
                 for (let i = 1; i < rowDesc.cells.length - 1; i++) {
                     const cell = rowDesc.cells[i];
                     if (!cell.classList.contains('error-multiplo')) {
                         const val = parseInt(cell.textContent || 0);
-                        if (!isNaN(val)) suma += val;
+                        if (!isNaN(val)) sumaTotal += val;
                     }
                 }
             }
             
-            // Actualizar el total en AMBAS filas
-            rowAsc.querySelector(".total").textContent = suma;
+            // Actualizar el total en la primera tabla (Solo parcial)
+            rowAsc.querySelector(".total").textContent = sumaAsc;
+            // Actualizar el total en la segunda tabla (Acumulado)
             if (rowDesc) {
-                rowDesc.querySelector(".total").textContent = suma;
+                rowDesc.querySelector(".total").textContent = sumaTotal;
             }
         });
 
         // --- 2. LÓGICA DE RANKING (COMO EN POCHA) ---
         const datosJugadores = Array.from(cuerpoTablaAsc.rows).map(row => {
+            const nombre = row.getAttribute('data-jugador');
+            const rowDesc = cuerpoTablaDesc.querySelector(`tr[data-jugador="${nombre}"]`);
+            // El ranking se basa en el total acumulado (tabla descendente)
+            const puntos = rowDesc ? parseInt(rowDesc.querySelector(".total").textContent || 0) : 0;
             return {
-                nombre: row.getAttribute('data-jugador'),
-                puntos: parseInt(row.querySelector(".total").textContent || 0)
+                nombre: nombre,
+                puntos: puntos
             };
         });
 
@@ -417,10 +426,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 2. SOLUCIÓN VOZ: Creamos la función que el sistema de voz necesita para leer el ranking.
     window.obtenerRankingParaVoz = function() {
-        const datosJugadores = Array.from(cuerpoTablaAsc.rows).map(row => ({
-            nombre: row.getAttribute('data-jugador'),
-            puntos: parseInt(row.querySelector(".total").textContent || 0)
-        }));
+        const datosJugadores = Array.from(cuerpoTablaAsc.rows).map(row => {
+            const nombre = row.getAttribute('data-jugador');
+            const rowDesc = cuerpoTablaDesc.querySelector(`tr[data-jugador="${nombre}"]`);
+            const puntos = rowDesc ? parseInt(rowDesc.querySelector(".total").textContent || 0) : 0;
+            return { nombre, puntos };
+        });
         return datosJugadores.sort((a, b) => b.puntos - a.puntos);
     };
 
